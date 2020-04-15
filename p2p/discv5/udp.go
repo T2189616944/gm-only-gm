@@ -136,7 +136,7 @@ type (
 var (
 	versionPrefix     = []byte("temporary discovery v5")
 	versionPrefixSize = len(versionPrefix)
-	sigSize           = 520 / 8
+	sigSize           = 520/8 + 33
 	headSize          = versionPrefixSize + sigSize // space of packet frame data
 )
 
@@ -340,7 +340,7 @@ func encodePacket(priv *ecdsa.PrivateKey, ptype byte, req interface{}) (p, hash 
 		return nil, nil, err
 	}
 	packet := b.Bytes()
-	sig, err := crypto.Sign(crypto.Keccak256(packet[headSize:]), priv)
+	sig, err := crypto.SignWithPub(crypto.Keccak256(packet[headSize:]), priv)
 	if err != nil {
 		log.Error(fmt.Sprint("could not sign packet:", err))
 		return nil, nil, err

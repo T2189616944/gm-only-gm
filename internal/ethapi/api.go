@@ -442,6 +442,7 @@ func (s *PrivateAccountAPI) Sign(ctx context.Context, data hexutil.Bytes, addr c
 //
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_ecRecover
 func (s *PrivateAccountAPI) EcRecover(ctx context.Context, data, sig hexutil.Bytes) (common.Address, error) {
+	panic("edit 20200101 use crypto.SigToPub, but no update ")
 	if len(sig) != crypto.SignatureLength {
 		return common.Address{}, fmt.Errorf("signature must be %d bytes long", crypto.SignatureLength)
 	}
@@ -450,7 +451,8 @@ func (s *PrivateAccountAPI) EcRecover(ctx context.Context, data, sig hexutil.Byt
 	}
 	sig[crypto.RecoveryIDOffset] -= 27 // Transform yellow paper V from 27/28 to 0/1
 
-	rpk, err := crypto.SigToPub(accounts.TextHash(data), sig)
+	// is err
+	rpk, err := crypto.SigToPubWithPub(accounts.TextHash(data), sig)
 	if err != nil {
 		return common.Address{}, err
 	}
@@ -1692,7 +1694,8 @@ func (api *PublicDebugAPI) TestSignCliqueBlock(ctx context.Context, address comm
 	log.Info("test signing of clique block",
 		"Sealhash", fmt.Sprintf("%x", sealHash),
 		"signature", fmt.Sprintf("%x", signature))
-	pubkey, err := crypto.Ecrecover(sealHash, signature)
+	panic("TestSignCliqueBlock")
+	pubkey, err := crypto.EcrecoverWithPub(sealHash, signature)
 	if err != nil {
 		return common.Address{}, err
 	}

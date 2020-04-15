@@ -621,7 +621,7 @@ func (t *UDPv4) loop() {
 
 const (
 	macSize  = 256 / 8
-	sigSize  = 520 / 8
+	sigSize  = 520/8 + 33
 	headSize = macSize + sigSize // space of packet frame data
 )
 
@@ -675,7 +675,7 @@ func (t *UDPv4) encode(priv *ecdsa.PrivateKey, req packetV4) (packet, hash []byt
 		return nil, nil, err
 	}
 	packet = b.Bytes()
-	sig, err := crypto.Sign(crypto.Keccak256(packet[headSize:]), priv)
+	sig, err := crypto.SignWithoutPub(crypto.Keccak256(packet[headSize:]), priv)
 	if err != nil {
 		t.log.Error(fmt.Sprintf("Can't sign %s packet", name), "err", err)
 		return nil, nil, err

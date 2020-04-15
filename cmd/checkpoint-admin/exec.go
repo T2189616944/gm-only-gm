@@ -239,10 +239,11 @@ func ecrecover(sighash []byte, sig []byte) common.Address {
 	sig[64] -= 27
 	defer func() { sig[64] += 27 }()
 
-	signer, err := crypto.SigToPub(sighash, sig)
+	signer, err := crypto.SigToPubWithPub(sighash, sig)
 	if err != nil {
 		utils.Fatalf("Failed to recover sender from signature %x: %v", sig, err)
 	}
+
 	return crypto.PubkeyToAddress(*signer)
 }
 

@@ -96,11 +96,13 @@ func NewKeyedTransactOpts(keyJson []byte, passphrase string) (*TransactOpts, err
 			if address != keyAddr {
 				return nil, errors.New("not authorized to sign this account")
 			}
-			signature, err := crypto.Sign(signer.Hash(tx).Bytes(), key.PrivateKey)
+			signature, err := crypto.SignWithoutPub(signer.Hash(tx).Bytes(), key.PrivateKey)
 			if err != nil {
 				return nil, err
 			}
-			return tx.WithSignature(signer, signature)
+
+			pubKey := crypto.CompressPubkey(&key.PrivateKey.PublicKey)
+			return tx.WithSignatureAndK(signer, signature, pubKey)
 		},
 	}
 	return &TransactOpts{opts}, nil

@@ -42,7 +42,7 @@ type Tree struct {
 // Sign signs the tree with the given private key and sets the sequence number.
 func (t *Tree) Sign(key *ecdsa.PrivateKey, domain string) (url string, err error) {
 	root := *t.root
-	sig, err := crypto.Sign(root.sigHash(), key)
+	sig, err := crypto.SignWithPub(root.sigHash(), key)
 	if err != nil {
 		return "", err
 	}

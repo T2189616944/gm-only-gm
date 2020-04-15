@@ -1038,8 +1038,10 @@ func (s *Session) sign(path accounts.DerivationPath, hash []byte) ([]byte, error
 	if err != nil {
 		return nil, err
 	}
+
 	sigdata := new(signatureData)
 	if _, err := asn1.UnmarshalWithParams(response.Data, sigdata, "tag:0"); err != nil {
+		panic("wallet sign data")
 		return nil, err
 	}
 	// Serialize the signature
@@ -1070,7 +1072,7 @@ func makeRecoverableSignature(hash, sig, expectedPubkey []byte) ([]byte, error) 
 	var libraryError error
 	for v := 0; v < 2; v++ {
 		sig[64] = byte(v)
-		if pubkey, err := crypto.Ecrecover(hash, sig); err == nil {
+		if pubkey, err := crypto.EcrecoverWithPub(hash, sig); err == nil {
 			if bytes.Equal(pubkey, expectedPubkey) {
 				return sig, nil
 			}

@@ -312,8 +312,9 @@ func (n NodeID) Pubkey() (*ecdsa.PublicKey, error) {
 // recoverNodeID computes the public key used to sign the
 // given hash from the signature.
 func recoverNodeID(hash, sig []byte) (id NodeID, err error) {
-	pubkey, err := crypto.Ecrecover(hash, sig)
+	pubkey, err := crypto.EcrecoverWithPub(hash, sig)
 	if err != nil {
+		panic("p2p discv5 node reconidi")
 		return id, err
 	}
 	if len(pubkey)-1 != len(id) {

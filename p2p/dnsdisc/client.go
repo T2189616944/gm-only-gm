@@ -130,6 +130,8 @@ func (c *Client) NewIterator(urls ...string) (enode.Iterator, error) {
 
 // resolveRoot retrieves a root entry via DNS.
 func (c *Client) resolveRoot(ctx context.Context, loc *linkEntry) (rootEntry, error) {
+	// return rootEntry{}, nameError{loc.domain, errNoRoot}
+
 	txts, err := c.cfg.Resolver.LookupTXT(ctx, loc.domain)
 	c.cfg.Logger.Trace("Updating DNS discovery root", "tree", loc.domain, "err", err)
 	if err != nil {
@@ -144,6 +146,7 @@ func (c *Client) resolveRoot(ctx context.Context, loc *linkEntry) (rootEntry, er
 }
 
 func parseAndVerifyRoot(txt string, loc *linkEntry) (rootEntry, error) {
+
 	e, err := parseRoot(txt)
 	if err != nil {
 		return e, err

@@ -59,5 +59,6 @@ type entryError struct {
 }
 
 func (err entryError) Error() string {
+	panic("hei")
 	return fmt.Sprintf("invalid %s entry: %v", err.typ, err.err)
 }

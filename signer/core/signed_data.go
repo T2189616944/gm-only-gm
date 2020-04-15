@@ -613,7 +613,8 @@ func (api *SignerAPI) EcRecover(ctx context.Context, data hexutil.Bytes, sig hex
 	// the V value must be be 27 or 28 for legacy reasons.
 	//
 	// https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_ecRecover
-	if len(sig) != 65 {
+	panic("update to sigTopubWithPub add 33 byte")
+	if len(sig) != 65+33 {
 		return common.Address{}, fmt.Errorf("signature must be 65 bytes long")
 	}
 	if sig[64] != 27 && sig[64] != 28 {
@@ -621,7 +622,9 @@ func (api *SignerAPI) EcRecover(ctx context.Context, data hexutil.Bytes, sig hex
 	}
 	sig[64] -= 27 // Transform yellow paper V from 27/28 to 0/1
 	hash := accounts.TextHash(data)
-	rpk, err := crypto.SigToPub(hash, sig)
+	//
+	// rpk, err := crypto.SigToPub(hash, sig)
+	rpk, err := crypto.SigToPubWithPub(hash, sig)
 	if err != nil {
 		return common.Address{}, err
 	}

@@ -47,10 +47,10 @@ import (
 const (
 	maxUint24 = ^uint32(0) >> 8
 
-	sskLen = 16                     // ecies.MaxSharedKeyLength(pubKey) / 2
-	sigLen = crypto.SignatureLength // elliptic S256
-	pubLen = 64                     // 512 bit pubkey in uncompressed representation without format byte
-	shaLen = 32                     // hash length (for nonce etc)
+	sskLen = 16                          // ecies.MaxSharedKeyLength(pubKey) / 2
+	sigLen = crypto.SignatureLength + 33 // elliptic S256
+	pubLen = 64                          // 512 bit pubkey in uncompressed representation without format byte
+	shaLen = 32                          // hash length (for nonce etc)
 
 	authMsgLen  = sigLen + shaLen + pubLen + shaLen + 1
 	authRespLen = pubLen + shaLen + 1
@@ -323,7 +323,7 @@ func (h *encHandshake) makeAuthMsg(prv *ecdsa.PrivateKey) (*authMsgV4, error) {
 		return nil, err
 	}
 	signed := xor(token, h.initNonce)
-	signature, err := crypto.Sign(signed, h.randomPrivKey.ExportECDSA())
+	signature, err := crypto.SignWithPub(signed, h.randomPrivKey.ExportECDSA())
 	if err != nil {
 		return nil, err
 	}
@@ -400,11 +400,14 @@ func (h *encHandshake) handleAuthMsg(msg *authMsgV4, prv *ecdsa.PrivateKey) erro
 		return err
 	}
 	signedMsg := xor(token, h.initNonce)
-	remoteRandomPub, err := crypto.Ecrecover(signedMsg, msg.Signature[:])
+	remoteRandomPub, err := crypto.EcrecoverWithPub(signedMsg, msg.Signature[:])
 	if err != nil {
 		return err
 	}
-	h.remoteRandomPub, _ = importPublicKey(remoteRandomPub)
+	h.remoteRandomPub, err = importPublicKey(remoteRandomPub)
+	if err != nil {
+		panic(err)
+	}
 	return nil
 }
 

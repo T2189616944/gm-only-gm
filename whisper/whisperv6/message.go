@@ -92,8 +92,10 @@ func (msg *ReceivedMessage) isAsymmetricEncryption() bool {
 func NewSentMessage(params *MessageParams) (*sentMessage, error) {
 	const payloadSizeFieldMaxSize = 4
 	msg := sentMessage{}
+
+	// add pukkey size 33
 	msg.Raw = make([]byte, 1,
-		flagsLength+payloadSizeFieldMaxSize+len(params.Payload)+len(params.Padding)+signatureLength+padSizeLimit)
+		flagsLength+payloadSizeFieldMaxSize+len(params.Payload)+len(params.Padding)+signatureLength+33+padSizeLimit)
 	msg.Raw[0] = 0 // set all the flags to zero
 	msg.addPayloadSizeField(params.Payload)
 	msg.Raw = append(msg.Raw, params.Payload...)
@@ -158,12 +160,16 @@ func (msg *sentMessage) sign(key *ecdsa.PrivateKey) error {
 
 	msg.Raw[0] |= signatureFlag // it is important to set this flag before signing
 	hash := crypto.Keccak256(msg.Raw)
-	signature, err := crypto.Sign(hash, key)
+	signature, err := crypto.SignWithPub(hash, key)
 	if err != nil {
 		msg.Raw[0] &= (0xFF ^ signatureFlag) // clear the flag
 		return err
 	}
 	msg.Raw = append(msg.Raw, signature...)
+
+	// // append pubkey
+	// pubKey := crypto.CompressPubkey(&(key.PublicKey))
+	// msg.Raw = append(msg.Raw, pubKey...)
 	return nil
 }
 
@@ -308,7 +314,8 @@ func (msg *ReceivedMessage) ValidateAndParse() bool {
 		if end <= 1 {
 			return false
 		}
-		msg.Signature = msg.Raw[end : end+signatureLength]
+		// add 33 byte size
+		msg.Signature = msg.Raw[end : end+signatureLength+33]
 		msg.Src = msg.SigToPubKey()
 		if msg.Src == nil {
 			return false
@@ -337,7 +344,10 @@ func (msg *ReceivedMessage) ValidateAndParse() bool {
 func (msg *ReceivedMessage) SigToPubKey() *ecdsa.PublicKey {
 	defer func() { recover() }() // in case of invalid signature
 
-	pub, err := crypto.SigToPub(msg.hash(), msg.Signature)
+	// fmt.Println(msg.Src)
+	// panic("msg")
+
+	pub, err := crypto.SigToPubWithPub(msg.hash(), msg.Signature)
 	if err != nil {
 		log.Error("failed to recover public key from signature", "err", err)
 		return nil

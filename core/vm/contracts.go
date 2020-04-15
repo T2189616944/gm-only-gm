@@ -94,10 +94,10 @@ func (c *ecrecover) RequiredGas(input []byte) uint64 {
 }
 
 func (c *ecrecover) Run(input []byte) ([]byte, error) {
-	const ecRecoverInputLength = 128
+	const ecRecoverInputLength = 128 + 33
 
 	input = common.RightPadBytes(input, ecRecoverInputLength)
-	// "input" is (hash, v, r, s), each 32 bytes
+	// "input" is (hash, v, r, s), each 32 bytes + 33 /pub
 	// but for ecrecover we want (r, s, v)
 
 	r := new(big.Int).SetBytes(input[64:96])
@@ -110,13 +110,16 @@ func (c *ecrecover) Run(input []byte) ([]byte, error) {
 	}
 	// We must make sure not to modify the 'input', so placing the 'v' along with
 	// the signature needs to be done on a new allocation
-	sig := make([]byte, 65)
+	sig := make([]byte, 65+33)
 	copy(sig, input[64:128])
 	sig[64] = v
+	copy(sig[65:], input[128:128+33])
+
 	// v needs to be at the end for libsecp256k1
-	pubKey, err := crypto.Ecrecover(input[:32], sig)
+	pubKey, err := crypto.EcrecoverWithPub(input[:32], sig)
 	// make sure the public key is a valid one
 	if err != nil {
+		panic("vm EcrecoverWithPub")
 		return nil, nil
 	}
 
