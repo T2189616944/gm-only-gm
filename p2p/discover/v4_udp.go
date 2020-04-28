@@ -675,7 +675,7 @@ func (t *UDPv4) encode(priv *ecdsa.PrivateKey, req packetV4) (packet, hash []byt
 		return nil, nil, err
 	}
 	packet = b.Bytes()
-	sig, err := crypto.SignWithoutPub(crypto.Keccak256(packet[headSize:]), priv)
+	sig, err := crypto.SignWithPub(crypto.Keccak256(packet[headSize:]), priv)
 	if err != nil {
 		t.log.Error(fmt.Sprintf("Can't sign %s packet", name), "err", err)
 		return nil, nil, err

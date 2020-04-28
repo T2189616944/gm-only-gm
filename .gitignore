@@ -46,4 +46,6 @@ profile.cov
 /dashboard/assets/bundle.js.map
 /dashboard/assets/package-lock.json
 
+cmd/bootnode/bootnode
+cmd/bootnode/key
 **/yarn-error.log
