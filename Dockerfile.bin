@@ -1,0 +1,9 @@
+# 打包, 使用 alpine 作为基础镜像
+FROM archlinux:latest
+
+RUN apk add --no-cache ca-certificates
+# COPY ./build/bin/geth /usr/local/bin/
+COPY ./cmd/geth/geth /usr/local/bin/
+
+EXPOSE 8545 8546 8547 30303 30303/udp
+ENTRYPOINT ["geth"]
