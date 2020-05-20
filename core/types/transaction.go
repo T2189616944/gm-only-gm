@@ -203,6 +203,10 @@ func (tx *Transaction) Hash() common.Hash {
 	return v
 }
 
+func (tx *Transaction) CompressedPublickey() []byte {
+	return tx.data.K
+}
+
 // Size returns the true RLP encoded storage size of the transaction, either by
 // encoding and returning it, or returning a previsouly cached value.
 func (tx *Transaction) Size() common.StorageSize {
@@ -238,26 +242,27 @@ func (tx *Transaction) AsMessage(s Signer) (Message, error) {
 
 // WithSignature returns a new transaction with the given signature.
 // This signature needs to be in the [R || S || V] format where V is 0 or 1.
-func (tx *Transaction) WithSignature(signer Signer, sig []byte) (*Transaction, error) {
+func (tx *Transaction) WithSignature(signer Signer, sig []byte, pubKey []byte) (*Transaction, error) {
 	r, s, v, err := signer.SignatureValues(tx, sig)
 	if err != nil {
 		return nil, err
 	}
 	cpy := &Transaction{data: tx.data}
 	cpy.data.R, cpy.data.S, cpy.data.V = r, s, v
+	cpy.data.K = pubKey
 	return cpy, nil
 }
 
-func (tx *Transaction) WithSignatureAndK(signer Signer, sig, k []byte) (*Transaction, error) {
-	r, s, v, err := signer.SignatureValues(tx, sig)
-	if err != nil {
-		return nil, err
-	}
-	cpy := &Transaction{data: tx.data}
-	cpy.data.R, cpy.data.S, cpy.data.V = r, s, v
-	cpy.data.K = k
-	return cpy, nil
-}
+// func (tx *Transaction) WithSignatureAndK(signer Signer, sig, k []byte) (*Transaction, error) {
+// 	r, s, v, err := signer.SignatureValues(tx, sig)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	cpy := &Transaction{data: tx.data}
+// 	cpy.data.R, cpy.data.S, cpy.data.V = r, s, v
+// 	cpy.data.K = k
+// 	return cpy, nil
+// }
 
 // Cost returns amount + gasprice * gaslimit.
 func (tx *Transaction) Cost() *big.Int {

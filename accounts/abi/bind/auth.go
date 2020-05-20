@@ -57,7 +57,7 @@ func NewKeyStoreTransactor(keystore *keystore.KeyStore, account accounts.Account
 			if err != nil {
 				return nil, err
 			}
-			return tx.WithSignature(signer, signature)
+			return tx.WithSignature(signer, signature, tx.CompressedPublickey())
 		},
 	}, nil
 }
@@ -78,7 +78,7 @@ func NewKeyedTransactor(key *ecdsa.PrivateKey) *TransactOpts {
 			}
 
 			pubK := crypto.CompressPubkey(&key.PublicKey)
-			return tx.WithSignatureAndK(signer, signature, pubK)
+			return tx.WithSignature(signer, signature, pubK)
 		},
 	}
 }

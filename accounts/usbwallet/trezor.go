@@ -259,7 +259,7 @@ func (w *trezorDriver) trezorSign(derivationPath []uint32, tx *types.Transaction
 		signature[64] -= byte(chainID.Uint64()*2 + 35)
 	}
 	// Inject the final signature into the transaction and sanity check the sender
-	signed, err := tx.WithSignature(signer, signature)
+	signed, err := tx.WithSignature(signer, signature, tx.CompressedPublickey())
 	if err != nil {
 		return common.Address{}, nil, err
 	}

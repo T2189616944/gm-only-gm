@@ -24,8 +24,6 @@ import (
 	"fmt"
 	"math/big"
 
-	// "github.com/ethereum/go-ethereum/common/math"
-	// "github.com/ethereum/go-ethereum/crypto/secp256k1"
 	"github.com/tjfoc/gmsm/sm2"
 )
 

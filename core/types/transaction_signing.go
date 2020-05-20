@@ -61,7 +61,7 @@ func SignTx(tx *Transaction, s Signer, prv *ecdsa.PrivateKey) (*Transaction, err
 		return nil, err
 	}
 	tx.data.K = crypto.CompressPubkey(&prv.PublicKey)
-	return tx.WithSignature(s, sig)
+	return tx.WithSignature(s, sig, tx.data.K)
 }
 
 // Sender returns the address derived from the signature (V, R, S) using secp256k1
