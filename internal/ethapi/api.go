@@ -1024,6 +1024,10 @@ func RPCMarshalHeader(head *types.Header) map[string]interface{} {
 		"timestamp":        hexutil.Uint64(head.Time),
 		"transactionsRoot": head.TxHash,
 		"receiptsRoot":     head.ReceiptHash,
+		"tasksRoot":		head.TaskHash,
+		"creditsRoot":		head.CreditHash,
+		"pstotal":			head.PSTotal,
+		"psaverage":		head.PSAverage,
 	}
 }
 

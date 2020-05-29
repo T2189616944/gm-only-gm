@@ -564,6 +564,13 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainReader, header *types.
 	// No block rewards in PoA, so the state remains as is and uncles are dropped
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
+	header.PSTotal = 0
+	for _, tx := range txs {
+		if tx.To() != nil{
+			header.PSTotal += state.GetState(*tx.To(), common.BigToHash(big.NewInt(0))).Big().Uint64()
+			log.Info("MMMMMMMMMMMMMMMMMMMFinalizeAndAssemble", "score",state.GetState(*tx.To(), common.BigToHash(big.NewInt(0))).Big().Uint64())
+		}
+	}
 
 	// Assemble and return the final block for sealing
 	return types.NewBlock(header, txs, nil, receipts), nil
