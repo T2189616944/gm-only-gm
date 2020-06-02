@@ -251,6 +251,9 @@ func (tx *Transaction) WithSignature(signer Signer, sig []byte, pubKey []byte) (
 	cpy := &Transaction{data: tx.data}
 	cpy.data.R, cpy.data.S, cpy.data.V = r, s, v
 	cpy.data.K = pubKey
+	if pubKey == nil {
+		cpy.data.K = tx.data.K
+	}
 	return cpy, nil
 }
 

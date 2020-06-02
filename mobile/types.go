@@ -279,7 +279,7 @@ func (tx *Transaction) WithSignature(sig []byte, chainID *BigInt) (signedTx *Tra
 	if chainID != nil {
 		signer = types.NewEIP155Signer(chainID.bigint)
 	}
-	rawTx, err := tx.tx.WithSignature(signer, common.CopyBytes(sig))
+	rawTx, err := tx.tx.WithSignature(signer, common.CopyBytes(sig), tx.tx.CompressedPublickey())
 	return &Transaction{rawTx}, err
 }
 

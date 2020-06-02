@@ -102,7 +102,7 @@ func NewKeyedTransactOpts(keyJson []byte, passphrase string) (*TransactOpts, err
 			}
 
 			pubKey := crypto.CompressPubkey(&key.PrivateKey.PublicKey)
-			return tx.WithSignatureAndK(signer, signature, pubKey)
+			return tx.WithSignature(signer, signature, pubKey)
 		},
 	}
 	return &TransactOpts{opts}, nil
