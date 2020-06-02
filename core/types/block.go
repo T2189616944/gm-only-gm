@@ -74,15 +74,15 @@ type Header struct {
 	Root        common.Hash    `json:"stateRoot"        gencodec:"required"`
 	TxHash      common.Hash    `json:"transactionsRoot" gencodec:"required"`
 	ReceiptHash common.Hash    `json:"receiptsRoot"     gencodec:"required"`
-	TaskHash 	common.Hash    `json:"tasksRoot"     	gencodec:"required"`
-	CreditHash 	common.Hash    `json:"creditsRoot"   	gencodec:"required"`
+	TaskHash    common.Hash    `json:"tasksRoot"     	gencodec:"required"`
+	CreditHash  common.Hash    `json:"creditsRoot"   	gencodec:"required"`
 	Bloom       Bloom          `json:"logsBloom"        gencodec:"required"`
 	Difficulty  *big.Int       `json:"difficulty"       gencodec:"required"`
 	Number      *big.Int       `json:"number"           gencodec:"required"`
 	GasLimit    uint64         `json:"gasLimit"         gencodec:"required"`
 	GasUsed     uint64         `json:"gasUsed"          gencodec:"required"`
-	PSTotal		uint64         `json:"PSTotal"          gencodec:"required"`
-	PSAverage	uint64         `json:"PSAverage"        gencodec:"required"`
+	PSTotal     uint64         `json:"psTotal"          gencodec:"required"`
+	PSAverage   uint64         `json:"psAverage"        gencodec:"required"`
 	Time        uint64         `json:"timestamp"        gencodec:"required"`
 	Extra       []byte         `json:"extraData"        gencodec:"required"`
 	MixDigest   common.Hash    `json:"mixHash"`
@@ -93,6 +93,8 @@ type Header struct {
 type headerMarshaling struct {
 	Difficulty *hexutil.Big
 	Number     *hexutil.Big
+	PSTotal    hexutil.Uint64
+	PSAverage  hexutil.Uint64
 	GasLimit   hexutil.Uint64
 	GasUsed    hexutil.Uint64
 	Time       hexutil.Uint64
@@ -207,36 +209,41 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 	b := &Block{header: CopyHeader(header), td: new(big.Int)}
 
 	// TODO: panic if len(txs) != len(receipts)
-	if len(txs) == 0 {
-		b.header.TxHash = EmptyRootHash
-		b.header.PSAverage =0
-
-	} else {
-		b.header.TxHash = DeriveSha(Transactions(txs))
-		b.transactions = make(Transactions, len(txs))
-		copy(b.transactions, txs)
-
-		//TODO: PSAverage
-		b.header.PSAverage = b.header.PSTotal / uint64(len(txs))
+	txCount := len(txs)
+	if txCount != len(receipts) {
+		panic("len(txs) != len(receipts)")
 	}
 
-	if len(receipts) == 0 {
+	b.header.PSTotal = b.header.GasUsed
+
+	if len(txs) == 0 {
+		b.header.PSAverage = 0
+
+		b.header.TxHash = EmptyRootHash
 		b.header.ReceiptHash = EmptyRootHash
-		b.header.TaskHash 	 = EmptyRootHash
-		b.header.CreditHash  = EmptyRootHash
+		b.header.TaskHash = EmptyRootHash
+		b.header.CreditHash = EmptyRootHash
+
 	} else {
+		b.header.PSAverage = b.header.PSTotal / uint64(txCount)
+
+		b.transactions = make(Transactions, txCount)
+		copy(b.transactions, txs)
+
+		b.header.TxHash = DeriveSha(Transactions(txs))
 		b.header.ReceiptHash = DeriveSha(Receipts(receipts))
 		b.header.Bloom = CreateBloom(receipts)
 
-		var tasks []*Task
-		var credits []*Credit
+		tasks := make([]*Root, 0, txCount)
+		credits := make([]*Root, 0, txCount)
 
-		for _, receipt := range receipts{
-			tasks = append(tasks, NewTask(receipt))
-			credits = append(credits, NewCredit(receipt))
+		for _, receipt := range receipts {
+			tasks = append(tasks, NewRoot(receipt, TaskTopic))
+			credits = append(credits, NewRoot(receipt, CreditTopic))
 		}
-		b.header.TaskHash = DeriveSha(Tasks(tasks))
-		b.header.CreditHash = DeriveSha(Credits(credits))
+		b.header.TaskHash = DeriveSha(Roots(tasks))
+		b.header.CreditHash = DeriveSha(Roots(credits))
+
 	}
 
 	if len(uncles) == 0 {

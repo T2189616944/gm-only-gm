@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/ethereum/go-ethereum/log"
 	"math/big"
 	"runtime"
 	"time"
@@ -572,7 +571,7 @@ func (ethash *Ethash) Prepare(chain consensus.ChainReader, header *types.Header)
 // setting the final state on the header
 func (ethash *Ethash) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header) {
 	// Accumulate any block and uncle rewards and commit the final state root
-	accumulateRewards(chain.Config(), state, header, uncles)
+	// accumulateRewards(chain.Config(), state, header, uncles)
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 }
 
@@ -582,13 +581,14 @@ func (ethash *Ethash) FinalizeAndAssemble(chain consensus.ChainReader, header *t
 	// Accumulate any block and uncle rewards and commit the final state root
 	//accumulateRewards(chain.Config(), state, header, uncles)
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
-	header.PSTotal = 0
-	for _, tx := range txs {
-		if tx.To() != nil{
-			header.PSTotal += state.GetState(*tx.To(), common.BigToHash(big.NewInt(0))).Big().Uint64()
-			log.Info("MMMMMMMMMMMMMMMMMMMFinalizeAndAssemble", "score",state.GetState(*tx.To(), common.BigToHash(big.NewInt(0))).Big().Uint64())
-		}
-	}
+	// ?
+	// header.PSTotal = 0
+	// for _, tx := range txs {
+	// 	if tx.To() != nil {
+	// 		header.PSTotal += state.GetState(*tx.To(), common.BigToHash(big.NewInt(0))).Big().Uint64()
+	// 		log.Info("MMMMMMMMMMMMMMMMMMMFinalizeAndAssemble", "score", state.GetState(*tx.To(), common.BigToHash(big.NewInt(0))).Big().Uint64())
+	// 	}
+	// }
 	// Header seems complete, assemble into a block and return
 	return types.NewBlock(header, txs, uncles, receipts), nil
 }
@@ -626,6 +626,7 @@ var (
 // reward. The total reward consists of the static block reward and rewards for
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
+	return
 	// Select the correct block reward based on chain progression
 	blockReward := FrontierBlockReward
 	if config.IsByzantium(header.Number) {

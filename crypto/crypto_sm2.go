@@ -33,7 +33,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/tjfoc/gmsm/sm3"
+	// "github.com/tjfoc/gmsm/sm3"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -53,19 +53,38 @@ var (
 
 var errInvalidPubkey = errors.New("invalid sm2 public key")
 
-// Keccak256 calculates and returns the Keccak256 hash of the input data.
+// 国密 sm3 hash
+// // Keccak256 calculates and returns the Keccak256 hash of the input data.
+// func Keccak256(data ...[]byte) []byte {
+// 	d := sm3.New()
+// 	for _, b := range data {
+// 		d.Write(b)
+// 	}
+// 	return d.Sum(nil)
+// }
+
+// // Keccak256Hash calculates and returns the Keccak256 hash of the input data,
+// // converting it to an internal Hash data structure.
+// func Keccak256Hash(data ...[]byte) (h common.Hash) {
+// 	d := sm3.New()
+// 	for _, b := range data {
+// 		d.Write(b)
+// 	}
+// 	d.Sum(h[:0])
+// 	return h
+// }
+
+// hash 算法使用 sha3
 func Keccak256(data ...[]byte) []byte {
-	d := sm3.New()
+	d := sha3.NewLegacyKeccak256()
 	for _, b := range data {
 		d.Write(b)
 	}
 	return d.Sum(nil)
 }
 
-// Keccak256Hash calculates and returns the Keccak256 hash of the input data,
-// converting it to an internal Hash data structure.
 func Keccak256Hash(data ...[]byte) (h common.Hash) {
-	d := sm3.New()
+	d := sha3.NewLegacyKeccak256()
 	for _, b := range data {
 		d.Write(b)
 	}

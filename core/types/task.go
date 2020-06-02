@@ -14,7 +14,7 @@ type Task struct {
 	//Status            uint64 `json:"status"`
 	//CumulativeGasUsed uint64 `json:"cumulativeGasUsed" gencodec:"required"`
 	//Bloom             Bloom  `json:"logsBloom"         gencodec:"required"`
-	Logs              []*Log `json:"logs"              gencodec:"required"`
+	Logs []*Log `json:"logs"              gencodec:"required"`
 
 	// Implementation fields: These fields are added by geth when processing a transaction.
 	// They are stored in the chain database.
@@ -29,24 +29,21 @@ type Task struct {
 	TransactionIndex uint        `json:"transactionIndex"`
 }
 
-
-
-func NewTask(receipt *Receipt)*Task{
+func NewTask(receipt *Receipt) *Task {
 	t := &Task{TxHash: receipt.TxHash,
-		BlockHash: receipt.BlockHash,
-		BlockNumber:receipt.BlockNumber,
-		TransactionIndex:receipt.TransactionIndex,
+		BlockHash:        receipt.BlockHash,
+		BlockNumber:      receipt.BlockNumber,
+		TransactionIndex: receipt.TransactionIndex,
 	}
-	for _, l := range receipt.Logs{
-		log.Info("MMMMMMMMMMMMMMMMMMMNewTask", "Topics",l.Topics[0],"TaskTopic",TaskTopic,"l.Topics[0] == TaskTopic",l.Topics[0] == TaskTopic)
+	for _, l := range receipt.Logs {
+		log.Info("MMMMMMMMMMMMMMMMMMMNewTask", "Topics", l.Topics[0], "TaskTopic", TaskTopic, "l.Topics[0] == TaskTopic", l.Topics[0] == TaskTopic)
 
-		if l.Topics[0] == TaskTopic{
+		if l.Topics[0] == TaskTopic {
 			t.Logs = append(t.Logs, l)
 		}
 	}
 	return t
 }
-
 
 type Tasks []*Task
 
