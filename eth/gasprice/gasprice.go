@@ -30,6 +30,7 @@ import (
 )
 
 var maxPrice = big.NewInt(500 * params.GWei)
+var zeroPrice = big.NewInt(0)
 
 type Config struct {
 	Blocks     int
@@ -75,6 +76,7 @@ func NewOracle(backend ethapi.Backend, params Config) *Oracle {
 
 // SuggestPrice returns the recommended gas price.
 func (gpo *Oracle) SuggestPrice(ctx context.Context) (*big.Int, error) {
+	return zeroPrice, nil
 	gpo.cacheLock.RLock()
 	lastHead := gpo.lastHead
 	lastPrice := gpo.lastPrice

@@ -49,3 +49,7 @@ profile.cov
 cmd/bootnode/bootnode
 cmd/bootnode/key
 **/yarn-error.log
+
+cmd/abigen/abigen
+cmd/abigen/storage.abi
+cmd/abigen/storage.go
