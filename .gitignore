@@ -53,3 +53,4 @@ cmd/bootnode/key
 cmd/abigen/abigen
 cmd/abigen/storage.abi
 cmd/abigen/storage.go
+cmd/geth/test_node

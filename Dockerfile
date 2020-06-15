@@ -1,5 +1,5 @@
-# 如果本地已经编译完成. 可以省掉这个步骤
-FROM golang:1.13-alpine as builder
+# Build Geth in a stock Go builder container
+FROM golang:1.14-alpine as builder
 
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
