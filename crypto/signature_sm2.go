@@ -28,7 +28,7 @@ import (
 )
 
 func EcrecoverWithPub(hash, sig []byte) ([]byte, error) {
-	if len(sig) != SignatureLength+33 {
+	if len(sig) != SignatureLength {
 		// panic("size error , wang 98")
 		return nil, fmt.Errorf("error ")
 	}
@@ -82,7 +82,7 @@ func SigToPubWithPub(hash, sig []byte) (*ecdsa.PublicKey, error) {
 // }
 
 // The produced signature is in the [R || S || V] format where V is 0 or 1.
-func SignWithoutPub(digestHash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
+func signWithoutPub(digestHash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
 	if len(digestHash) != DigestLength {
 		return nil, fmt.Errorf("hash is required to be exactly %d bytes (%d)", DigestLength, len(digestHash))
 	}
@@ -100,7 +100,7 @@ func SignWithoutPub(digestHash []byte, prv *ecdsa.PrivateKey) (sig []byte, err e
 		// panic("sign failed: " + err.Error())
 		return nil, err
 	}
-	sig = make([]byte, SignatureLength)
+	sig = make([]byte, 65)
 	copy(sig[:32], r.Bytes())
 	copy(sig[32:64], s.Bytes())
 	// sig[64] = 0 // invalid V
@@ -108,7 +108,7 @@ func SignWithoutPub(digestHash []byte, prv *ecdsa.PrivateKey) (sig []byte, err e
 }
 
 func SignWithPub(digestHash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
-	sig, err = SignWithoutPub(digestHash, prv)
+	sig, err = signWithoutPub(digestHash, prv)
 	if err != nil {
 		// panic("sign failed: " + err.Error())
 		return nil, err
@@ -135,7 +135,7 @@ func VerifySignature(pubkey, digestHash, signature []byte) bool {
 		// UnmarshalPubkey(pubkey)
 		x, y := elliptic.Unmarshal(S256(), pubkey)
 		if x == nil {
-			// panic("parse decompress pubkey failed:")
+			panic("parse decompress pubkey failed:")
 			return false
 		}
 		sm2Pub = &sm2.PublicKey{
@@ -146,12 +146,13 @@ func VerifySignature(pubkey, digestHash, signature []byte) bool {
 	}
 
 	if sm2Pub == nil || sm2Pub.X == nil {
-		// panic("parse pubkey  failed: is nil ")
+		panic("parse pubkey  failed: is nil ")
 		return false
 	}
 
 	if len(signature) != 64 {
-		// panic("parse sig  failed: size error")
+		fmt.Println(len(signature))
+		panic("parse sig  failed: size error")
 		return false
 	}
 

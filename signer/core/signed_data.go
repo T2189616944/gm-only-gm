@@ -612,9 +612,9 @@ func (api *SignerAPI) EcRecover(ctx context.Context, data hexutil.Bytes, sig hex
 	// the V value must be be 27 or 28 for legacy reasons.
 	//
 	// https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_ecRecover
-	panic("update to sigTopubWithPub add 33 byte")
+	// panic("update to sigTopubWithPub add 33 byte")
 	if len(sig) != 65+33 {
-		return common.Address{}, fmt.Errorf("signature must be 65 bytes long")
+		return common.Address{}, fmt.Errorf("signature must be 65 +33 bytes long")
 	}
 	if sig[64] != 27 && sig[64] != 28 {
 		return common.Address{}, fmt.Errorf("invalid Ethereum signature (V is not 27 or 28)")

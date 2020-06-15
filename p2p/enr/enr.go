@@ -273,10 +273,12 @@ func (r *Record) SetSig(s IdentityScheme, sig []byte) error {
 	// Verify if we have a scheme.
 	case s != nil:
 		if err := s.Verify(r, sig); err != nil {
+			fmt.Println("verror ")
 			return err
 		}
 		raw, err := r.encode(sig)
 		if err != nil {
+			fmt.Println("end error ")
 			return err
 		}
 		r.signature, r.raw = sig, raw

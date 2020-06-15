@@ -439,7 +439,7 @@ func (s *PrivateAccountAPI) Sign(ctx context.Context, data hexutil.Bytes, addr c
 //
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_ecRecover
 func (s *PrivateAccountAPI) EcRecover(ctx context.Context, data, sig hexutil.Bytes) (common.Address, error) {
-	panic("edit 20200101 use crypto.SigToPub, but no update ")
+	// panic("edit 20200101 use crypto.SigToPub, but no update ")
 	if len(sig) != crypto.SignatureLength {
 		return common.Address{}, fmt.Errorf("signature must be %d bytes long", crypto.SignatureLength)
 	}
@@ -1110,10 +1110,10 @@ func RPCMarshalHeader(head *types.Header) map[string]interface{} {
 		"timestamp":        hexutil.Uint64(head.Time),
 		"transactionsRoot": head.TxHash,
 		"receiptsRoot":     head.ReceiptHash,
-		"tasksRoot":		head.TaskHash,
-		"creditsRoot":		head.CreditHash,
-		"pstotal":			head.PSTotal,
-		"psaverage":		head.PSAverage,
+		"tasksRoot":        head.TaskHash,
+		"creditsRoot":      head.CreditHash,
+		"pstotal":          head.PSTotal,
+		"psaverage":        head.PSAverage,
 	}
 }
 

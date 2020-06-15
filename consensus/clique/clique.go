@@ -55,8 +55,8 @@ const (
 var (
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 
-	extraVanity = 32                          // Fixed number of extra-data prefix bytes reserved for signer vanity
-	extraSeal   = crypto.SignatureLength + 33 // Fixed number of extra-data suffix bytes reserved for signer seal
+	extraVanity = 32                     // Fixed number of extra-data prefix bytes reserved for signer vanity
+	extraSeal   = crypto.SignatureLength // Fixed number of extra-data suffix bytes reserved for signer seal
 
 	nonceAuthVote = hexutil.MustDecode("0xffffffffffffffff") // Magic nonce number to vote on adding a new signer
 	nonceDropVote = hexutil.MustDecode("0x0000000000000000") // Magic nonce number to vote on removing a signer.
@@ -566,9 +566,9 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainReader, header *types.
 	header.UncleHash = types.CalcUncleHash(nil)
 	header.PSTotal = 0
 	for _, tx := range txs {
-		if tx.To() != nil{
+		if tx.To() != nil {
 			header.PSTotal += state.GetState(*tx.To(), common.BigToHash(big.NewInt(0))).Big().Uint64()
-			log.Info("MMMMMMMMMMMMMMMMMMMFinalizeAndAssemble", "score",state.GetState(*tx.To(), common.BigToHash(big.NewInt(0))).Big().Uint64())
+			log.Info("MMMMMMMMMMMMMMMMMMMFinalizeAndAssemble", "score", state.GetState(*tx.To(), common.BigToHash(big.NewInt(0))).Big().Uint64())
 		}
 	}
 

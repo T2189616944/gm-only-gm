@@ -198,16 +198,17 @@ func seqFromTail(tail []rlp.RawValue) uint64 {
 
 // Encoder/decoder.
 
-// const (
-// 	macSize  = 32
-// 	sigSize  = crypto.SignatureLength
-// 	headSize = macSize + sigSize // space of packet frame data
-// )
 const (
 	macSize  = 32
-	sigSize  = 520/8 + 33
+	sigSize  = crypto.SignatureLength
 	headSize = macSize + sigSize // space of packet frame data
 )
+
+// const (
+// 	macSize  = 32
+// 	sigSize  = 520/8 + 33
+// 	headSize = macSize + sigSize // space of packet frame data
+// )
 
 var (
 	ErrPacketTooSmall = errors.New("too small")

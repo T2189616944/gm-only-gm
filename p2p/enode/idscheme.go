@@ -50,14 +50,16 @@ func SignV4(r *enr.Record, privkey *ecdsa.PrivateKey) error {
 
 	h := sha3.NewLegacyKeccak256()
 	rlp.Encode(h, cpy.AppendElements(nil))
-	sig, err := crypto.SignWithoutPub(h.Sum(nil), privkey)
+	sig, err := crypto.SignWithPub(h.Sum(nil), privkey)
 	if err != nil {
 		return err
 	}
-	sig = sig[:len(sig)-1] // remove v
+
+	sig = sig[:len(sig)-1-33] // remove v adn put key
 	if err = cpy.SetSig(V4ID{}, sig); err == nil {
 		*r = cpy
 	}
+
 	return err
 }
 

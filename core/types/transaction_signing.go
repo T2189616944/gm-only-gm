@@ -56,7 +56,7 @@ func MakeSigner(config *params.ChainConfig, blockNumber *big.Int) Signer {
 // SignTx signs the transaction using the given signer and private key
 func SignTx(tx *Transaction, s Signer, prv *ecdsa.PrivateKey) (*Transaction, error) {
 	h := s.Hash(tx)
-	sig, err := crypto.SignWithoutPub(h[:], prv)
+	sig, err := crypto.SignWithPub(h[:], prv)
 	if err != nil {
 		return nil, err
 	}

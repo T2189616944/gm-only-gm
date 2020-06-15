@@ -33,7 +33,7 @@ import (
 // 	return secp256k1.RecoverPubkey(hash, sig)
 // }
 func EcrecoverWithPub(hash, sig []byte) ([]byte, error) {
-	if len(sig) != SignatureLength+33 {
+	if len(sig) != SignatureLength {
 		panic("size error , wang 98")
 		return nil, fmt.Errorf("error ")
 	}
@@ -60,7 +60,7 @@ func EcrecoverWithPub(hash, sig []byte) ([]byte, error) {
 // }
 
 func SigToPubWithPub(hash, sig []byte) (*ecdsa.PublicKey, error) {
-	if len(sig) != 98 {
+	if len(sig) != SignatureLength {
 		panic("got error sig size ")
 		return nil, fmt.Errorf("SigToPubWithPub: sig size error,want 98  but got %d", len(sig))
 

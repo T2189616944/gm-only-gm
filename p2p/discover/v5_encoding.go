@@ -400,11 +400,11 @@ func (c *wireCodec) deriveKeys(n1, n2 enode.ID, priv *ecdsa.PrivateKey, pub *ecd
 
 // signIDNonce creates the ID nonce signature.
 func (c *wireCodec) signIDNonce(nonce, ephkey []byte) ([]byte, error) {
-	idsig, err := crypto.SignWithoutPub(c.idNonceHash(nonce, ephkey), c.privkey)
+	idsig, err := crypto.SignWithPub(c.idNonceHash(nonce, ephkey), c.privkey)
 	if err != nil {
 		return nil, fmt.Errorf("can't sign: %v", err)
 	}
-	return idsig[:len(idsig)-1], nil // remove recovery ID
+	return idsig[:len(idsig)-1-33], nil // remove recovery ID and pub key
 }
 
 // idNonceHash computes the hash of id nonce with prefix.
