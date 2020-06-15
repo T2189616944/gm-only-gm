@@ -79,13 +79,31 @@ var DiscoveryV5Bootnodes = []string{
 	// "enode://85c85d7143ae8bb96924f2b54f1b3e70d8c4d367af305325d30a61385a432f247d2c75c45c6b4a60335060d072d7f5b35dd1d4c45f76941f62a4f83b6e75daaf@40.118.3.223:30307",
 }
 
+// YoloV1Bootnodes are the enode URLs of the P2P bootstrap nodes running on the
+// YOLOv1 ephemeral test network.
+var YoloV1Bootnodes = []string{
+	// "enode://9e1096aa59862a6f164994cb5cb16f5124d6c992cdbf4535ff7dea43ea1512afe5448dca9df1b7ab0726129603f1a3336b631e4d7a1a44c94daddd03241587f9@35.178.210.161:30303",
+	"",
+}
+
 const dnsPrefix = "enrtree://AKA3AM6LPBYEUDMVNU3BSVQJ5AD45Y7YPOHJLEF6W26QOE4VTUDPE@"
 
-// These DNS names provide bootstrap connectivity for public testnets and the mainnet.
-// See https://github.com/ethereum/discv4-dns-lists for more information.
-var KnownDNSNetworks = map[common.Hash]string{
-	MainnetGenesisHash: dnsPrefix + "all.mainnet.ethdisco.net",
-	// TestnetGenesisHash: dnsPrefix + "all.ropsten.ethdisco.net",
-	// RinkebyGenesisHash: dnsPrefix + "all.rinkeby.ethdisco.net",
-	// GoerliGenesisHash: dnsPrefix + "all.goerli.ethdisco.net",
+// KnownDNSNetwork returns the address of a public DNS-based node list for the given
+// genesis hash and protocol. See https://github.com/ethereum/discv4-dns-lists for more
+// information.
+func KnownDNSNetwork(genesis common.Hash, protocol string) string {
+	var net string
+	switch genesis {
+	case MainnetGenesisHash:
+		net = "mainnet"
+	case RopstenGenesisHash:
+		net = "ropsten"
+	case RinkebyGenesisHash:
+		net = "rinkeby"
+	case GoerliGenesisHash:
+		net = "goerli"
+	default:
+		return ""
+	}
+	return dnsPrefix + protocol + "." + net + ".ethdisco.net"
 }
