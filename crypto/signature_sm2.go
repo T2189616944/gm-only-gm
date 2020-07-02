@@ -135,7 +135,7 @@ func VerifySignature(pubkey, digestHash, signature []byte) bool {
 		// UnmarshalPubkey(pubkey)
 		x, y := elliptic.Unmarshal(S256(), pubkey)
 		if x == nil {
-			panic("parse decompress pubkey failed:")
+			// panic("parse decompress pubkey failed:")
 			return false
 		}
 		sm2Pub = &sm2.PublicKey{
@@ -146,13 +146,13 @@ func VerifySignature(pubkey, digestHash, signature []byte) bool {
 	}
 
 	if sm2Pub == nil || sm2Pub.X == nil {
-		panic("parse pubkey  failed: is nil ")
+		// panic("parse pubkey  failed: is nil ")
 		return false
 	}
 
 	if len(signature) != 64 {
-		fmt.Println(len(signature))
-		panic("parse sig  failed: size error")
+		// fmt.Println(len(signature))
+		// panic("parse sig  failed: size error")
 		return false
 	}
 
@@ -161,7 +161,7 @@ func VerifySignature(pubkey, digestHash, signature []byte) bool {
 
 	ok := sm2.Verify(sm2Pub, digestHash, r, s)
 	if !ok {
-		fmt.Printf("%X\n", digestHash)
+		// fmt.Printf("%X\n", digestHash)
 		// panic("verify signatrue failed")
 	}
 	return ok
@@ -170,7 +170,28 @@ func VerifySignature(pubkey, digestHash, signature []byte) bool {
 
 // DecompressPubkey parses a public key in the 33-byte compressed format.
 func DecompressPubkey(pubkey []byte) (*ecdsa.PublicKey, error) {
+	key, err := decompressPubkey(pubkey)
+	if err != nil {
+		return nil, err
+	}
+	if key == nil {
+		return nil, fmt.Errorf("invalid public key")
+	}
+	return key, nil
+}
+
+func decompressPubkey(pubkey []byte) (*ecdsa.PublicKey, error) {
+	defer func() {
+		recover()
+		// if data != nil {
+
+		// }
+	}()
+
 	sm2Pub := sm2.Decompress(pubkey)
+	if sm2Pub == nil {
+		return nil, fmt.Errorf("invalid public key")
+	}
 	if sm2Pub.X == nil {
 		// panic("parse public err")
 		return nil, fmt.Errorf("invalid public key")

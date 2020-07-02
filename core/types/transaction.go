@@ -95,7 +95,7 @@ func newTransaction(nonce uint64, to *common.Address, amount *big.Int, gasLimit 
 		V:            new(big.Int),
 		R:            new(big.Int),
 		S:            new(big.Int),
-		// K:            []byte{},
+		K:            []byte{},
 	}
 	if amount != nil {
 		d.Amount.Set(amount)
@@ -139,7 +139,6 @@ func (tx *Transaction) DecodeRLP(s *rlp.Stream) error {
 	if err == nil {
 		tx.size.Store(common.StorageSize(rlp.ListSize(size)))
 	}
-
 	return err
 }
 

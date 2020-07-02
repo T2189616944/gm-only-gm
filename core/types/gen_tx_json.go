@@ -25,6 +25,7 @@ func (t txdata) MarshalJSON() ([]byte, error) {
 		V            *hexutil.Big    `json:"v" gencodec:"required"`
 		R            *hexutil.Big    `json:"r" gencodec:"required"`
 		S            *hexutil.Big    `json:"s" gencodec:"required"`
+		K            hexutil.Bytes   `json:"k" gencodec:"required"`
 		Hash         *common.Hash    `json:"hash" rlp:"-"`
 	}
 	var enc txdata
@@ -37,8 +38,11 @@ func (t txdata) MarshalJSON() ([]byte, error) {
 	enc.V = (*hexutil.Big)(t.V)
 	enc.R = (*hexutil.Big)(t.R)
 	enc.S = (*hexutil.Big)(t.S)
+	enc.K = t.K
 	enc.Hash = t.Hash
-	return json.Marshal(&enc)
+	buf, err := json.Marshal(&enc)
+	return buf, err
+	// return json.Marshal(&enc)
 }
 
 // UnmarshalJSON unmarshals from JSON.
@@ -53,6 +57,7 @@ func (t *txdata) UnmarshalJSON(input []byte) error {
 		V            *hexutil.Big    `json:"v" gencodec:"required"`
 		R            *hexutil.Big    `json:"r" gencodec:"required"`
 		S            *hexutil.Big    `json:"s" gencodec:"required"`
+		K            *hexutil.Bytes  `json:"k" gencodec:"required"`
 		Hash         *common.Hash    `json:"hash" rlp:"-"`
 	}
 	var dec txdata
@@ -97,5 +102,9 @@ func (t *txdata) UnmarshalJSON(input []byte) error {
 	if dec.Hash != nil {
 		t.Hash = dec.Hash
 	}
+	if dec.K == nil {
+		return errors.New("missing required field 'k' for txdata")
+	}
+	t.K = *dec.K
 	return nil
 }

@@ -54,3 +54,6 @@ cmd/abigen/abigen
 cmd/abigen/storage.abi
 cmd/abigen/storage.go
 cmd/geth/test_node
+cmd/geth/test_node*
+cmd/ethkey/ethkey
+cmd/ethkey/keyfile.json

@@ -239,8 +239,9 @@ func recoverPlain(sighash common.Hash, R, S, Vb *big.Int, homestead bool, k []by
 	pubKey, err := crypto.DecompressPubkey(k)
 	// pubKey, err := crypto.UnmarshalPubkey(k)
 	if err != nil {
-		fmt.Println(len(k))
-		panic("um ma pu keyu faile " + err.Error())
+		// fmt.Println(len(k))
+		return common.Address{}, err
+		// panic("um ma pu keyu faile " + err.Error())
 
 	}
 	pub := elliptic.Marshal(crypto.S256(), pubKey.X, pubKey.Y)
