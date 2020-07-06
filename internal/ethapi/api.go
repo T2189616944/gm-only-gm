@@ -1112,8 +1112,8 @@ func RPCMarshalHeader(head *types.Header) map[string]interface{} {
 		"receiptsRoot":     head.ReceiptHash,
 		"tasksRoot":        head.TaskHash,
 		"creditsRoot":      head.CreditHash,
-		"pstotal":          head.PSTotal,
-		"psaverage":        head.PSAverage,
+		"pstotal":          hexutil.Uint64(head.PSTotal),
+		"psaverage":        hexutil.Uint64(head.PSAverage),
 	}
 }
 

@@ -93,10 +93,10 @@ type Header struct {
 type headerMarshaling struct {
 	Difficulty *hexutil.Big
 	Number     *hexutil.Big
-	PSTotal    hexutil.Uint64
-	PSAverage  hexutil.Uint64
 	GasLimit   hexutil.Uint64
 	GasUsed    hexutil.Uint64
+	PSTotal    hexutil.Uint64
+	PSAverage  hexutil.Uint64
 	Time       hexutil.Uint64
 	Extra      hexutil.Bytes
 	Hash       common.Hash `json:"hash"` // adds call to Hash() in MarshalJSON
@@ -234,15 +234,19 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 		b.header.ReceiptHash = DeriveSha(Receipts(receipts))
 		b.header.Bloom = CreateBloom(receipts)
 
-		tasks := make([]*Root, 0, txCount)
-		credits := make([]*Root, 0, txCount)
+		// 大坑
+		// tasks := make([]*Root, 0, txCount)
+		// credits := make([]*Root, 0, txCount)
 
-		for _, receipt := range receipts {
-			tasks = append(tasks, NewRoot(receipt, TaskTopic))
-			credits = append(credits, NewRoot(receipt, CreditTopic))
-		}
-		b.header.TaskHash = DeriveSha(Roots(tasks))
-		b.header.CreditHash = DeriveSha(Roots(credits))
+		// for _, receipt := range receipts {
+		// 	tasks = append(tasks, NewRoot(receipt, TaskTopic))
+		// 	credits = append(credits, NewRoot(receipt, CreditTopic))
+		// }
+		// b.header.TaskHash = DeriveSha(Roots(tasks))
+		// b.header.CreditHash = DeriveSha(Roots(credits))
+
+		b.header.TaskHash = b.header.ReceiptHash
+		b.header.CreditHash = b.header.ReceiptHash
 
 	}
 

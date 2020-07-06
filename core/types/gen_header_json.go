@@ -22,11 +22,15 @@ func (h Header) MarshalJSON() ([]byte, error) {
 		Root        common.Hash    `json:"stateRoot"        gencodec:"required"`
 		TxHash      common.Hash    `json:"transactionsRoot" gencodec:"required"`
 		ReceiptHash common.Hash    `json:"receiptsRoot"     gencodec:"required"`
+		TaskHash    common.Hash    `json:"tasksRoot"     	gencodec:"required"`
+		CreditHash  common.Hash    `json:"creditsRoot"   	gencodec:"required"`
 		Bloom       Bloom          `json:"logsBloom"        gencodec:"required"`
 		Difficulty  *hexutil.Big   `json:"difficulty"       gencodec:"required"`
 		Number      *hexutil.Big   `json:"number"           gencodec:"required"`
 		GasLimit    hexutil.Uint64 `json:"gasLimit"         gencodec:"required"`
 		GasUsed     hexutil.Uint64 `json:"gasUsed"          gencodec:"required"`
+		PSTotal     hexutil.Uint64 `json:"psTotal"          gencodec:"required"`
+		PSAverage   hexutil.Uint64 `json:"psAverage"        gencodec:"required"`
 		Time        hexutil.Uint64 `json:"timestamp"        gencodec:"required"`
 		Extra       hexutil.Bytes  `json:"extraData"        gencodec:"required"`
 		MixDigest   common.Hash    `json:"mixHash"`
@@ -39,17 +43,22 @@ func (h Header) MarshalJSON() ([]byte, error) {
 	enc.Coinbase = h.Coinbase
 	enc.Root = h.Root
 	enc.TxHash = h.TxHash
+	enc.TaskHash = h.TaskHash
+	enc.CreditHash = h.CreditHash
 	enc.ReceiptHash = h.ReceiptHash
 	enc.Bloom = h.Bloom
 	enc.Difficulty = (*hexutil.Big)(h.Difficulty)
 	enc.Number = (*hexutil.Big)(h.Number)
 	enc.GasLimit = hexutil.Uint64(h.GasLimit)
 	enc.GasUsed = hexutil.Uint64(h.GasUsed)
+	enc.PSAverage = hexutil.Uint64(h.PSAverage)
+	enc.PSTotal = hexutil.Uint64(h.PSTotal)
 	enc.Time = hexutil.Uint64(h.Time)
 	enc.Extra = h.Extra
 	enc.MixDigest = h.MixDigest
 	enc.Nonce = h.Nonce
 	enc.Hash = h.Hash()
+
 	return json.Marshal(&enc)
 }
 
@@ -62,16 +71,21 @@ func (h *Header) UnmarshalJSON(input []byte) error {
 		Root        *common.Hash    `json:"stateRoot"        gencodec:"required"`
 		TxHash      *common.Hash    `json:"transactionsRoot" gencodec:"required"`
 		ReceiptHash *common.Hash    `json:"receiptsRoot"     gencodec:"required"`
+		TaskHash    *common.Hash    `json:"tasksRoot"     	gencodec:"required"`
+		CreditHash  *common.Hash    `json:"creditsRoot"   	gencodec:"required"`
 		Bloom       *Bloom          `json:"logsBloom"        gencodec:"required"`
 		Difficulty  *hexutil.Big    `json:"difficulty"       gencodec:"required"`
 		Number      *hexutil.Big    `json:"number"           gencodec:"required"`
 		GasLimit    *hexutil.Uint64 `json:"gasLimit"         gencodec:"required"`
 		GasUsed     *hexutil.Uint64 `json:"gasUsed"          gencodec:"required"`
+		PSTotal     *hexutil.Uint64 `json:"psTotal"          gencodec:"required"`
+		PSAverage   *hexutil.Uint64 `json:"psAverage"        gencodec:"required"`
 		Time        *hexutil.Uint64 `json:"timestamp"        gencodec:"required"`
 		Extra       *hexutil.Bytes  `json:"extraData"        gencodec:"required"`
 		MixDigest   *common.Hash    `json:"mixHash"`
 		Nonce       *BlockNonce     `json:"nonce"`
 	}
+
 	var dec Header
 	if err := json.Unmarshal(input, &dec); err != nil {
 		return err
@@ -103,6 +117,17 @@ func (h *Header) UnmarshalJSON(input []byte) error {
 	if dec.Bloom == nil {
 		return errors.New("missing required field 'logsBloom' for Header")
 	}
+
+	if dec.TaskHash == nil {
+		return errors.New("missing required field 'taskHash' for Header")
+	}
+	h.TaskHash = *dec.TaskHash
+
+	if dec.CreditHash == nil {
+		return errors.New("missing required field 'creditHash' for Header")
+	}
+	h.CreditHash = *dec.CreditHash
+
 	h.Bloom = *dec.Bloom
 	if dec.Difficulty == nil {
 		return errors.New("missing required field 'difficulty' for Header")
@@ -120,6 +145,15 @@ func (h *Header) UnmarshalJSON(input []byte) error {
 		return errors.New("missing required field 'gasUsed' for Header")
 	}
 	h.GasUsed = uint64(*dec.GasUsed)
+	if dec.PSTotal == nil {
+		return errors.New("missing required field 'PSTotal' for Header")
+	}
+	h.PSTotal = uint64(*dec.PSTotal)
+	if dec.PSAverage == nil {
+		return errors.New("missing required field 'PSAverage' for Header")
+	}
+	h.PSAverage = uint64(*dec.PSAverage)
+
 	if dec.Time == nil {
 		return errors.New("missing required field 'timestamp' for Header")
 	}
