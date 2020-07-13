@@ -29,6 +29,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/ethereum/go-ethereum/auth"
 	"github.com/ethereum/go-ethereum/cmd/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/console/prompt"
@@ -54,8 +55,13 @@ var (
 	gitDate   = ""
 	// The app that holds all commands and flags.
 	app = utils.NewApp(gitCommit, gitDate, "the go-ethereum command line interface")
+
+	// auth falgs
+
 	// flags that configure the node
 	nodeFlags = []cli.Flag{
+		utils.AuthServerFlag,
+		utils.AuthCodeFlag,
 		utils.IdentityFlag,
 		utils.UnlockedAccountFlag,
 		utils.PasswordFileFlag,
@@ -245,6 +251,7 @@ func init() {
 	}
 	sort.Sort(cli.CommandsByName(app.Commands))
 
+	// app.Flags = append(app.Flags, authFlags...)
 	app.Flags = append(app.Flags, nodeFlags...)
 	app.Flags = append(app.Flags, rpcFlags...)
 	app.Flags = append(app.Flags, consoleFlags...)
@@ -268,11 +275,14 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	auth.Close()
 }
 
 // prepare manipulates memory cache allowance and setups metric system.
 // This function should be called before launching devp2p stack.
 func prepare(ctx *cli.Context) {
+	// auth check
+
 	// If we're running a known preset, log it for convenience.
 	switch {
 	case ctx.GlobalIsSet(utils.LegacyTestnetFlag.Name):
@@ -344,8 +354,15 @@ func geth(ctx *cli.Context) error {
 		return fmt.Errorf("invalid command: %q", args[0])
 	}
 	prepare(ctx)
+
 	node := makeFullNode(ctx)
 	defer node.Close()
+
+	if err := auth.NodeAuth(); err != nil {
+		return err
+	}
+	defer auth.Close()
+
 	startNode(ctx, node)
 	node.Wait()
 	return nil

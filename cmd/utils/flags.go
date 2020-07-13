@@ -137,6 +137,18 @@ func printHelp(out io.Writer, templ string, data interface{}) {
 // are the same for all commands.
 
 var (
+	// authFlag
+	AuthServerFlag = cli.StringSliceFlag{
+		Name:  "auth.server",
+		Usage: "授权服务器",
+		// Value: cli.StringSlice{},
+	}
+	AuthCodeFlag = cli.StringSliceFlag{
+		Name:  "auth.code",
+		Usage: "授权码",
+		// Value: cli.StringSlice{},
+	}
+
 	// General settings
 	DataDirFlag = DirectoryFlag{
 		Name:  "datadir",

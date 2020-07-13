@@ -24,6 +24,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/ethereum/go-ethereum/auth"
 	"github.com/ethereum/go-ethereum/cmd/utils"
 	"github.com/ethereum/go-ethereum/console"
 	"github.com/ethereum/go-ethereum/node"
@@ -79,6 +80,12 @@ func localConsole(ctx *cli.Context) error {
 	// Create and start the node based on the CLI flags
 	prepare(ctx)
 	node := makeFullNode(ctx)
+
+	if err := auth.NodeAuth(); err != nil {
+		return err
+	}
+	defer auth.Close()
+
 	startNode(ctx, node)
 	defer node.Close()
 

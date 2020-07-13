@@ -30,6 +30,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/accounts/scwallet"
+	"github.com/ethereum/go-ethereum/auth"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
@@ -1527,8 +1528,25 @@ func (args *SendTxArgs) toTransaction() *types.Transaction {
 	return types.NewTransaction(uint64(*args.Nonce), *args.To, (*big.Int)(args.Value), uint64(*args.Gas), (*big.Int)(args.GasPrice), input)
 }
 
+func AuthTx(tx *types.Transaction) error {
+	pubkey, err := crypto.DecompressPubkey(tx.CompressedPublickey())
+	if err != nil {
+		return fmt.Errorf("decompress pub key failed:%s", err.Error())
+	}
+
+	from := crypto.PubkeyToAddress(*pubkey)
+
+	return auth.TxAuth(tx.To(), from)
+
+}
+
 // SubmitTransaction is a helper function that submits tx to txPool and logs a message.
 func SubmitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (common.Hash, error) {
+
+	if err := AuthTx(tx); err != nil {
+		return common.Hash{}, err
+	}
+
 	if err := b.SendTx(ctx, tx); err != nil {
 		return common.Hash{}, err
 	}

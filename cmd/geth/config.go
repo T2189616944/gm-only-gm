@@ -26,7 +26,9 @@ import (
 
 	cli "gopkg.in/urfave/cli.v1"
 
+	"github.com/ethereum/go-ethereum/auth"
 	"github.com/ethereum/go-ethereum/cmd/utils"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/params"
@@ -171,6 +173,12 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	if cfg.Ethstats.URL != "" {
 		utils.RegisterEthStatsService(stack, cfg.Ethstats.URL)
 	}
+
+	key := cfg.Node.NodeKey()
+	nodeId := fmt.Sprintf("%x", crypto.FromECDSAPub(&key.PublicKey)[1:])
+
+	auth.NewAuther(ctx.StringSlice("auth.server"), nodeId, ctx.String("auth.code"))
+
 	return stack
 }
 
