@@ -146,7 +146,6 @@ var (
 	AuthCodeFlag = cli.StringSliceFlag{
 		Name:  "auth.code",
 		Usage: "授权码",
-		// Value: cli.StringSlice{},
 	}
 
 	// General settings

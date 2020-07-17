@@ -8,10 +8,15 @@ import (
 
 var (
 	gAuther *Auther
+
+	deployAccountAddr = common.HexToAddress("0X8E514EAEB5BADB3B5C929C41BF78F06D7271C8AF")
+
+	ERROR_UNAUTHORIZED_ACCOUNT = errors.New("Unauthorized deployment contract")
+	ERROR_NODE_AUTH_FAILED     = errors.New("node auth failed")
 )
 
-func TxAuth(comtractAddr *common.Address, accountAddr common.Address) error {
-	return gAuther.TxAuth(comtractAddr, accountAddr)
+func TxAuth(contractAddr *common.Address, accountAddr common.Address) error {
+	return gAuther.TxAuth(contractAddr, accountAddr)
 
 }
 
@@ -59,9 +64,21 @@ func (auther *Auther) NodeAuth() error {
 	return nil
 }
 
-func (auther *Auther) TxAuth(comtractAddr *common.Address, accountAddr common.Address) error {
+func (auther *Auther) TxAuth(contractAddr *common.Address, accountAddr common.Address) error {
 
-	return SendTxAuth(comtractAddr, accountAddr)
+	//  合约安装
+	// 判断是否可安装合约用户
+	// 这个可安装合约用户写在代码里？还是通过在线方式获得？
+	// 目前简单写死吧
+	if contractAddr == nil {
+		if accountAddr == deployAccountAddr {
+			return nil
+		} else {
+			return ERROR_UNAUTHORIZED_ACCOUNT
+		}
+	}
+
+	return SendTxAuth(contractAddr, accountAddr)
 
 }
 
