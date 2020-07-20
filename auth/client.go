@@ -15,7 +15,7 @@ const (
 	NODE_STATUS_ONLINE  = 3
 	NODE_STATUS_OFFLINE = 4
 
-	node_auth_action   = "/rod-api/node/getlsStart"
+	node_auth_action   = "/rod-api/node/getIsStart"
 	node_status_action = "/rod-api/node/updateStatus"
 )
 
@@ -59,6 +59,9 @@ func call(params interface{}, action string) error {
 		return err
 	}
 
+	// fmt.Println(action)
+	// fmt.Println("send ", string(buf))
+
 	body := bytes.NewReader(buf)
 
 	for _, bc := range gAuther.addrs {
@@ -84,8 +87,8 @@ func call(params interface{}, action string) error {
 			return nil
 		}
 
-		fmt.Println("response code is not 0")
-		fmt.Println(string(buf))
+		// fmt.Println("response code is not 0")
+		// fmt.Println(string(buf))
 
 		return ERROR_NODE_AUTH_FAILED
 	}

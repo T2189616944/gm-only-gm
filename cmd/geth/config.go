@@ -178,7 +178,6 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	nodeId := fmt.Sprintf("%x", crypto.FromECDSAPub(&key.PublicKey)[1:])
 
 	auth.NewAuther(ctx.StringSlice("auth.server"), nodeId, ctx.String("auth.code"))
-
 	return stack
 }
 

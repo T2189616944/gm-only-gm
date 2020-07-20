@@ -51,8 +51,15 @@ func NewAuther(bc []string, nodeId, secret string) *Auther {
 
 func (auther *Auther) NodeAuth() error {
 	if len(auther.addrs) == 0 {
-		return errors.New("License server address is empty ")
+		return errors.New("auth.server address is empty ")
 	}
+	if auther.nodeId == "" {
+		return errors.New("NodeId is empty")
+	}
+	if auther.secret == "" {
+		return errors.New("auth.code is empty")
+	}
+
 	if err := SendNodeAuth(auther.nodeId, auther.secret); err != nil {
 		return err
 	}
