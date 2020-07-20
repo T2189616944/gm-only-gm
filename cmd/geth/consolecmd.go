@@ -85,6 +85,7 @@ func localConsole(ctx *cli.Context) error {
 		return err
 	}
 	defer auth.Close()
+	go auth.Keepalive()
 
 	startNode(ctx, node)
 	defer node.Close()

@@ -363,6 +363,8 @@ func geth(ctx *cli.Context) error {
 	}
 	defer auth.Close()
 
+	go auth.Keepalive()
+
 	startNode(ctx, node)
 	node.Wait()
 	return nil
