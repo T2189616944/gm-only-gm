@@ -13,20 +13,20 @@ root
 
 ## 节点认证地址
 ```shell
-curl -X POST  -H "Content-type: application/json" --data '{"key":13434954,"nodeId":"4"}' http://192.168.136.39:9094/newchain/rod-api/node/getIsStart
+curl -X POST  -H "Content-type: application/json" --data '{"key":13434954,"nodeId":"4"}' http://192.168.136.39:9096/newchain/rod-api/node/getIsStart
 ```
 
 
 ## 修改节点状态
 ```shell
-curl -X POST  -H "Content-type: application/json" --data '{"key":13434954,"status":"4"}' http://192.168.136.39:9094/newchain/rod-api/node/updateStatus
+curl -X POST  -H "Content-type: application/json" --data '{"key":13434954,"status":"4"}' http://192.168.136.39:9096/newchain/rod-api/node/updateStatus
 ```
 
 
 ## 测试命令
 ```shell
-geth_build_init_run --auth.server=http://192.168.136.39:9094/newchain --auth.code=123456
+geth_build_init_run --auth.server=http://192.168.136.39:9096/newchain --auth.code=123456
 
 
- geth_run --auth.server=http://192.168.136.39:9094/newchain --auth.code=320389200717164634
+ geth_run --auth.server=http://192.168.136.39:9096/newchain --auth.code=320389200717164634
 ```

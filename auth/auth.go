@@ -1,3 +1,5 @@
+// +build !noauth
+
 package auth
 
 import (
@@ -205,13 +207,9 @@ func call(params interface{}, action string, ctype string) error {
 			fmt.Println(string(buf))
 			return ERROR_NODE_AUTH_FAILED
 		}
-		if tmp.Code == 0 {
+
+		if tmp.Code == 200 {
 			return nil
-		}
-		if ctype == cType_urlencode {
-			if tmp.Code == 200 {
-				return nil
-			}
 		}
 
 		fmt.Println("response code is not 0")
