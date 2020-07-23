@@ -164,6 +164,55 @@ func (c *BoundContract) Call(opts *CallOpts, result interface{}, method string, 
 	return c.abi.Unpack(result, method, output)
 }
 
+func (c *BoundContract) Call2(opts *CallOpts, result map[string]interface{}, method string, params ...interface{}) error {
+	// Don't crash on a lazy user
+	if opts == nil {
+		opts = new(CallOpts)
+	}
+	// Pack the input, call and unpack the results
+	input, err := c.abi.Pack(method, params...)
+	if err != nil {
+		return err
+	}
+	var (
+		msg    = ethereum.CallMsg{From: opts.From, To: &c.address, Data: input}
+		ctx    = ensureContext(opts.Context)
+		code   []byte
+		output []byte
+	)
+	if opts.Pending {
+		pb, ok := c.caller.(PendingContractCaller)
+		if !ok {
+			return ErrNoPendingState
+		}
+		output, err = pb.PendingCallContract(ctx, msg)
+		if err == nil && len(output) == 0 {
+			// Make sure we have a contract to operate on, and bail out otherwise.
+			if code, err = pb.PendingCodeAt(ctx, c.address); err != nil {
+				return err
+			} else if len(code) == 0 {
+				return ErrNoCode
+			}
+		}
+	} else {
+		output, err = c.caller.CallContract(ctx, msg, opts.BlockNumber)
+		if err == nil && len(output) == 0 {
+			// Make sure we have a contract to operate on, and bail out otherwise.
+			if code, err = c.caller.CodeAt(ctx, c.address, opts.BlockNumber); err != nil {
+				return err
+			} else if len(code) == 0 {
+				return ErrNoCode
+			}
+		}
+	}
+	if err != nil {
+		return err
+	}
+	return c.abi.UnpackIntoMap(result, method, output)
+
+	// return c.abi.UnpackIntoMap(result, name, data)
+}
+
 // Transact invokes the (paid) contract method with params as input values.
 func (c *BoundContract) Transact(opts *TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	// Otherwise pack up the parameters and invoke the contract

@@ -64,6 +64,11 @@ func typeCheck(t Type, value reflect.Value) error {
 	if t.T == SliceTy || t.T == ArrayTy {
 		return sliceTypeCheck(t, value)
 	}
+	if t.T == TupleTy {
+		if value.Kind() == reflect.Map {
+			return nil
+		}
+	}
 
 	// Check base type validity. Element types will be checked later on.
 	if t.getType().Kind() != value.Kind() {
