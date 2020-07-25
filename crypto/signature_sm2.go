@@ -161,6 +161,7 @@ func VerifySignature(pubkey, digestHash, signature []byte) bool {
 
 	ok := sm2.Verify(sm2Pub, digestHash, r, s)
 	if !ok {
+		return false
 		// fmt.Printf("%X\n", digestHash)
 		// panic("verify signatrue failed")
 	}

@@ -335,8 +335,6 @@ func (t Type) pack(v reflect.Value) ([]byte, error) {
 				if !field.IsValid() {
 					return nil, fmt.Errorf("field %s for tuple not found in the given struct", t.TupleRawNames[i])
 				}
-				fmt.Println(t.TupleRawNames[i])
-				fmt.Println(field)
 				// fmt.Println(field.try)
 
 				// fmt.Println(.Kind())
