@@ -146,8 +146,8 @@ func (auther *Auther) TxAuth(contractAddr *common.Address, accountAddr common.Ad
 	}
 
 	params := make(url.Values)
-	params.Add("contractAddress", strings.ToUpper(contractAddr.String()))
-	params.Add("accountAddress", strings.ToUpper(accountAddr.String()))
+	params.Add("contractAddress", contractAddr.String())
+	params.Add("accountAddress", accountAddr.String())
 
 	if err := call(params, tx_auht_action, cType_urlencode); err != nil {
 		return ERROR_TX_AUTH_FAILED
@@ -207,7 +207,6 @@ func call(params interface{}, action string, ctype string) error {
 			fmt.Println(string(buf))
 			return ERROR_NODE_AUTH_FAILED
 		}
-
 		if tmp.Code == 200 {
 			return nil
 		}

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -16,10 +17,11 @@ func Test_call(t *testing.T) {
 
 	// 20200716193855
 	// ecbd8ac31b5a0e7a0ad0c6db6096ab20f27eeb0053bb8ed45bfb3aaae1acf77c
-	aAddr := common.HexToAddress("0X3B0BEB31C8470F59E50F868DB336B526D4A1CC58")
+	// 55b78881ac922a05f26a2725c247c374223ae7b89daf224cfa9c4d8d713e6ebb
+	aAddr := common.HexToAddress("0X50D0E7CD53A476AF05245E63ED174985BC11FD57")
 
 	// 16
-	cAddr := common.HexToAddress("0X7D5AF0845166377D23548674E00DF3AE4111C091")
+	cAddr := common.HexToAddress("0X93C72E8BBC3679DED22570D9139E6BDE7335F669")
 
 	// 4
 	// 0XCBA57F50736BA27AD2E6991E3F12AB624BFBB9FF
@@ -28,7 +30,7 @@ func Test_call(t *testing.T) {
 
 	// c_tag 40
 
-	TxAuth(&cAddr, aAddr)
+	fmt.Println(TxAuth(&cAddr, aAddr))
 	// return
 
 	nodeAuth := map[string]string{
