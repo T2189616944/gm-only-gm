@@ -1533,9 +1533,7 @@ func AuthTx(tx *types.Transaction) error {
 	if err != nil {
 		return fmt.Errorf("decompress pub key failed:%s", err.Error())
 	}
-
 	from := crypto.PubkeyToAddress(*pubkey)
-
 	return auth.TxAuth(tx.To(), from)
 
 }

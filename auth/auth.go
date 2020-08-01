@@ -145,6 +145,9 @@ func (auther *Auther) TxAuth(contractAddr *common.Address, accountAddr common.Ad
 		}
 	}
 
+	fmt.Println(contractAddr.String())
+	fmt.Println(accountAddr.String())
+
 	params := make(url.Values)
 	params.Add("contractAddress", contractAddr.String())
 	params.Add("accountAddress", accountAddr.String())

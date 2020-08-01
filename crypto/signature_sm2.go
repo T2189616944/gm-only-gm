@@ -172,16 +172,19 @@ func VerifySignature(pubkey, digestHash, signature []byte) bool {
 // DecompressPubkey parses a public key in the 33-byte compressed format.
 func DecompressPubkey(pubkey []byte) (*ecdsa.PublicKey, error) {
 	key, err := decompressPubkey(pubkey)
+	// fmt.Println(err)
 	if err != nil {
 		return nil, err
 	}
 	if key == nil {
 		return nil, fmt.Errorf("invalid public key")
 	}
+	// fmt.Println("y", key.Y)
 	return key, nil
 }
 
 func decompressPubkey(pubkey []byte) (*ecdsa.PublicKey, error) {
+
 	defer func() {
 		recover()
 		// if data != nil {
