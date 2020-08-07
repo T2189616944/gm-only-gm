@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// +build !sm2
-
 package crypto
 
 import (
@@ -26,6 +24,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -46,30 +45,35 @@ const RecoveryIDOffset = 64
 // DigestLength sets the signature digest exact length
 const DigestLength = 32
 
-var (
-	secp256k1N, _  = new(big.Int).SetString("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16)
-	secp256k1halfN = new(big.Int).Div(secp256k1N, big.NewInt(2))
-)
-
 var errInvalidPubkey = errors.New("invalid secp256k1 public key")
+
+// KeccakState wraps sha3.state. In addition to the usual hash methods, it also supports
+// Read to get a variable amount of data from the hash state. Read is faster than Sum
+// because it doesn't copy the internal state, but also modifies the internal state.
+type KeccakState interface {
+	hash.Hash
+	Read([]byte) (int, error)
+}
 
 // Keccak256 calculates and returns the Keccak256 hash of the input data.
 func Keccak256(data ...[]byte) []byte {
-	d := sha3.NewLegacyKeccak256()
+	b := make([]byte, 32)
+	d := sha3.NewLegacyKeccak256().(KeccakState)
 	for _, b := range data {
 		d.Write(b)
 	}
-	return d.Sum(nil)
+	d.Read(b)
+	return b
 }
 
 // Keccak256Hash calculates and returns the Keccak256 hash of the input data,
 // converting it to an internal Hash data structure.
 func Keccak256Hash(data ...[]byte) (h common.Hash) {
-	d := sha3.NewLegacyKeccak256()
+	d := sha3.NewLegacyKeccak256().(KeccakState)
 	for _, b := range data {
 		d.Write(b)
 	}
-	d.Sum(h[:0])
+	d.Read(h[:])
 	return h
 }
 
@@ -239,6 +243,9 @@ func GenerateKey() (*ecdsa.PrivateKey, error) {
 // ValidateSignatureValues verifies whether the signature values are valid with
 // the given chain rules. The v value is assumed to be either 0 or 1.
 func ValidateSignatureValues(v byte, r, s *big.Int, homestead bool) bool {
+	if isSM2 {
+		return true
+	}
 	if r.Cmp(common.Big1) < 0 || s.Cmp(common.Big1) < 0 {
 		return false
 	}

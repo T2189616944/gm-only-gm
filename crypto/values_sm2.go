@@ -1,4 +1,4 @@
-// Copyright 2017 The go-ethereum Authors
+// Copyright 2014 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
 // The go-ethereum library is free software: you can redistribute it and/or modify
@@ -14,10 +14,19 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// +build !VERIFY_EVM_INTEGER_POOL
+// +build sm2
 
-package vm
+package crypto
 
-const verifyPool = false
+import (
+	"math/big"
+)
 
-func verifyIntegerPool(ip *intPool) {}
+var (
+	sm2N, _   = new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123", 16)
+	sm2NhalfN = new(big.Int).Div(sm2N, big.NewInt(2))
+
+	secp256k1N     = sm2N
+	secp256k1halfN = sm2NhalfN
+	isSM2          = true
+)

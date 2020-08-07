@@ -1,4 +1,4 @@
-// Copyright 2017 The go-ethereum Authors
+// Copyright 2014 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
 // The go-ethereum library is free software: you can redistribute it and/or modify
@@ -14,18 +14,16 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// +build VERIFY_EVM_INTEGER_POOL
+// +build !sm2
 
-package vm
+package crypto
 
-import "fmt"
+import (
+	"math/big"
+)
 
-const verifyPool = true
-
-func verifyIntegerPool(ip *intPool) {
-	for i, item := range ip.pool.data {
-		if item.Cmp(checkVal) != 0 {
-			panic(fmt.Sprintf("%d'th item failed aggressive pool check. Value was modified", i))
-		}
-	}
-}
+var (
+	secp256k1N, _  = new(big.Int).SetString("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16)
+	secp256k1halfN = new(big.Int).Div(secp256k1N, big.NewInt(2))
+	isSM2          = false
+)

@@ -1,72 +1,88 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
-// +build sm2
+// // Copyright 2014 The go-ethereum Authors
+// // This file is part of the go-ethereum library.
+// //
+// // The go-ethereum library is free software: you can redistribute it and/or modify
+// // it under the terms of the GNU Lesser General Public License as published by
+// // the Free Software Foundation, either version 3 of the License, or
+// // (at your option) any later version.
+// //
+// // The go-ethereum library is distributed in the hope that it will be useful,
+// // but WITHOUT ANY WARRANTY; without even the implied warranty of
+// // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// // GNU Lesser General Public License for more details.
+// //
+// // You should have received a copy of the GNU Lesser General Public License
+// // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package crypto
 
-import (
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-	"encoding/hex"
-	"errors"
-	"fmt"
-	"io"
-	"io/ioutil"
-	"math/big"
-	"os"
+// import (
+// 	"crypto/ecdsa"
+// 	"crypto/elliptic"
+// 	"crypto/rand"
+// 	"encoding/hex"
+// 	"errors"
+// 	"fmt"
+// 	"io"
+// 	"io/ioutil"
+// 	"math/big"
+// 	"os"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/rlp"
-	// "github.com/tjfoc/gmsm/sm3"
-	"golang.org/x/crypto/sha3"
-)
+// 	"github.com/ethereum/go-ethereum/common"
+// 	"github.com/ethereum/go-ethereum/common/math"
+// 	"github.com/ethereum/go-ethereum/rlp"
+// 	// "github.com/tjfoc/gmsm/sm3"
+// 	"golang.org/x/crypto/sha3"
+// )
 
-//SignatureLength indicates the byte length required to carry a signature with recovery id.
-const SignatureLength = 64 + 1 + 33 // 64 bytes ECDSA signature + 1 byte recovery id  + 33 byte pubkey
+// //SignatureLength indicates the byte length required to carry a signature with recovery id.
+// const SignatureLength = 64 + 1 + 33 // 64 bytes ECDSA signature + 1 byte recovery id  + 33 byte pubkey
 
-// RecoveryIDOffset points to the byte offset within the signature that contains the recovery id.
-const RecoveryIDOffset = 64
+// // RecoveryIDOffset points to the byte offset within the signature that contains the recovery id.
+// const RecoveryIDOffset = 64
 
-// DigestLength sets the signature digest exact length
-const DigestLength = 32
+// // DigestLength sets the signature digest exact length
+// const DigestLength = 32
 
-var (
-	sm2N, _   = new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123", 16)
-	sm2NhalfN = new(big.Int).Div(sm2N, big.NewInt(2))
-)
+// var (
+// 	sm2N, _   = new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123", 16)
+// 	sm2NhalfN = new(big.Int).Div(sm2N, big.NewInt(2))
+// )
 
-var errInvalidPubkey = errors.New("invalid sm2 public key")
+// var errInvalidPubkey = errors.New("invalid sm2 public key")
 
-// 国密 sm3 hash
-// // Keccak256 calculates and returns the Keccak256 hash of the input data.
+// // 国密 sm3 hash
+// // // Keccak256 calculates and returns the Keccak256 hash of the input data.
+// // func Keccak256(data ...[]byte) []byte {
+// // 	d := sm3.New()
+// // 	for _, b := range data {
+// // 		d.Write(b)
+// // 	}
+// // 	return d.Sum(nil)
+// // }
+
+// // // Keccak256Hash calculates and returns the Keccak256 hash of the input data,
+// // // converting it to an internal Hash data structure.
+// // func Keccak256Hash(data ...[]byte) (h common.Hash) {
+// // 	d := sm3.New()
+// // 	for _, b := range data {
+// // 		d.Write(b)
+// // 	}
+// // 	d.Sum(h[:0])
+// // 	return h
+// // }
+
+// // hash 算法使用 sha3
 // func Keccak256(data ...[]byte) []byte {
-// 	d := sm3.New()
+// 	d := sha3.NewLegacyKeccak256()
 // 	for _, b := range data {
 // 		d.Write(b)
 // 	}
 // 	return d.Sum(nil)
 // }
 
-// // Keccak256Hash calculates and returns the Keccak256 hash of the input data,
-// // converting it to an internal Hash data structure.
 // func Keccak256Hash(data ...[]byte) (h common.Hash) {
-// 	d := sm3.New()
+// 	d := sha3.NewLegacyKeccak256()
 // 	for _, b := range data {
 // 		d.Write(b)
 // 	}
@@ -74,172 +90,154 @@ var errInvalidPubkey = errors.New("invalid sm2 public key")
 // 	return h
 // }
 
-// hash 算法使用 sha3
-func Keccak256(data ...[]byte) []byte {
-	d := sha3.NewLegacyKeccak256()
-	for _, b := range data {
-		d.Write(b)
-	}
-	return d.Sum(nil)
-}
+// // Keccak512 calculates and returns the Keccak512 hash of the input data.
+// func Keccak512(data ...[]byte) []byte {
+// 	d := sha3.NewLegacyKeccak512()
+// 	for _, b := range data {
+// 		d.Write(b)
+// 	}
+// 	return d.Sum(nil)
+// }
 
-func Keccak256Hash(data ...[]byte) (h common.Hash) {
-	d := sha3.NewLegacyKeccak256()
-	for _, b := range data {
-		d.Write(b)
-	}
-	d.Sum(h[:0])
-	return h
-}
+// // CreateAddress creates an ethereum address given the bytes and the nonce
+// func CreateAddress(b common.Address, nonce uint64) common.Address {
+// 	data, _ := rlp.EncodeToBytes([]interface{}{b, nonce})
+// 	return common.BytesToAddress(Keccak256(data)[12:])
+// }
 
-// Keccak512 calculates and returns the Keccak512 hash of the input data.
-func Keccak512(data ...[]byte) []byte {
-	d := sha3.NewLegacyKeccak512()
-	for _, b := range data {
-		d.Write(b)
-	}
-	return d.Sum(nil)
-}
+// // CreateAddress2 creates an ethereum address given the address bytes, initial
+// // contract code hash and a salt.
+// func CreateAddress2(b common.Address, salt [32]byte, inithash []byte) common.Address {
+// 	return common.BytesToAddress(Keccak256([]byte{0xff}, b.Bytes(), salt[:], inithash)[12:])
+// }
 
-// CreateAddress creates an ethereum address given the bytes and the nonce
-func CreateAddress(b common.Address, nonce uint64) common.Address {
-	data, _ := rlp.EncodeToBytes([]interface{}{b, nonce})
-	return common.BytesToAddress(Keccak256(data)[12:])
-}
+// // ToECDSA creates a private key with the given D value.
+// func ToECDSA(d []byte) (*ecdsa.PrivateKey, error) {
+// 	return toECDSA(d, true)
+// }
 
-// CreateAddress2 creates an ethereum address given the address bytes, initial
-// contract code hash and a salt.
-func CreateAddress2(b common.Address, salt [32]byte, inithash []byte) common.Address {
-	return common.BytesToAddress(Keccak256([]byte{0xff}, b.Bytes(), salt[:], inithash)[12:])
-}
+// // ToECDSAUnsafe blindly converts a binary blob to a private key. It should almost
+// // never be used unless you are sure the input is valid and want to avoid hitting
+// // errors due to bad origin encoding (0 prefixes cut off).
+// func ToECDSAUnsafe(d []byte) *ecdsa.PrivateKey {
+// 	priv, _ := toECDSA(d, false)
+// 	return priv
+// }
 
-// ToECDSA creates a private key with the given D value.
-func ToECDSA(d []byte) (*ecdsa.PrivateKey, error) {
-	return toECDSA(d, true)
-}
+// // toECDSA creates a private key with the given D value. The strict parameter
+// // controls whether the key's length should be enforced at the curve size or
+// // it can also accept legacy encodings (0 prefixes).
+// func toECDSA(d []byte, strict bool) (*ecdsa.PrivateKey, error) {
+// 	priv := new(ecdsa.PrivateKey)
+// 	priv.PublicKey.Curve = S256()
+// 	if strict && 8*len(d) != priv.Params().BitSize {
+// 		return nil, fmt.Errorf("invalid length, need %d bits", priv.Params().BitSize)
+// 	}
+// 	priv.D = new(big.Int).SetBytes(d)
 
-// ToECDSAUnsafe blindly converts a binary blob to a private key. It should almost
-// never be used unless you are sure the input is valid and want to avoid hitting
-// errors due to bad origin encoding (0 prefixes cut off).
-func ToECDSAUnsafe(d []byte) *ecdsa.PrivateKey {
-	priv, _ := toECDSA(d, false)
-	return priv
-}
+// 	// The priv.D must < N
+// 	if priv.D.Cmp(sm2N) >= 0 {
+// 		return nil, fmt.Errorf("invalid private key, >=N")
+// 	}
+// 	// The priv.D must not be zero or negative.
+// 	if priv.D.Sign() <= 0 {
+// 		return nil, fmt.Errorf("invalid private key, zero or negative")
+// 	}
 
-// toECDSA creates a private key with the given D value. The strict parameter
-// controls whether the key's length should be enforced at the curve size or
-// it can also accept legacy encodings (0 prefixes).
-func toECDSA(d []byte, strict bool) (*ecdsa.PrivateKey, error) {
-	priv := new(ecdsa.PrivateKey)
-	priv.PublicKey.Curve = S256()
-	if strict && 8*len(d) != priv.Params().BitSize {
-		return nil, fmt.Errorf("invalid length, need %d bits", priv.Params().BitSize)
-	}
-	priv.D = new(big.Int).SetBytes(d)
+// 	priv.PublicKey.X, priv.PublicKey.Y = priv.PublicKey.Curve.ScalarBaseMult(d)
+// 	if priv.PublicKey.X == nil {
+// 		return nil, errors.New("invalid private key")
+// 	}
+// 	return priv, nil
+// }
 
-	// The priv.D must < N
-	if priv.D.Cmp(sm2N) >= 0 {
-		return nil, fmt.Errorf("invalid private key, >=N")
-	}
-	// The priv.D must not be zero or negative.
-	if priv.D.Sign() <= 0 {
-		return nil, fmt.Errorf("invalid private key, zero or negative")
-	}
+// // FromECDSA exports a private key into a binary dump.
+// func FromECDSA(priv *ecdsa.PrivateKey) []byte {
+// 	if priv == nil {
+// 		return nil
+// 	}
+// 	return math.PaddedBigBytes(priv.D, priv.Params().BitSize/8)
+// }
 
-	priv.PublicKey.X, priv.PublicKey.Y = priv.PublicKey.Curve.ScalarBaseMult(d)
-	if priv.PublicKey.X == nil {
-		return nil, errors.New("invalid private key")
-	}
-	return priv, nil
-}
+// // UnmarshalPubkey converts bytes to a secp256k1 public key.
+// func UnmarshalPubkey(pub []byte) (*ecdsa.PublicKey, error) {
+// 	x, y := elliptic.Unmarshal(S256(), pub)
+// 	if x == nil {
+// 		return nil, errInvalidPubkey
+// 	}
+// 	return &ecdsa.PublicKey{Curve: S256(), X: x, Y: y}, nil
+// }
 
-// FromECDSA exports a private key into a binary dump.
-func FromECDSA(priv *ecdsa.PrivateKey) []byte {
-	if priv == nil {
-		return nil
-	}
-	return math.PaddedBigBytes(priv.D, priv.Params().BitSize/8)
-}
+// func FromECDSAPub(pub *ecdsa.PublicKey) []byte {
+// 	if pub == nil || pub.X == nil || pub.Y == nil {
+// 		return nil
+// 	}
+// 	return elliptic.Marshal(S256(), pub.X, pub.Y)
+// }
 
-// UnmarshalPubkey converts bytes to a secp256k1 public key.
-func UnmarshalPubkey(pub []byte) (*ecdsa.PublicKey, error) {
-	x, y := elliptic.Unmarshal(S256(), pub)
-	if x == nil {
-		return nil, errInvalidPubkey
-	}
-	return &ecdsa.PublicKey{Curve: S256(), X: x, Y: y}, nil
-}
+// // HexToECDSA parses a secp256k1 private key.
+// func HexToECDSA(hexkey string) (*ecdsa.PrivateKey, error) {
+// 	b, err := hex.DecodeString(hexkey)
+// 	if err != nil {
+// 		return nil, errors.New("invalid hex string")
+// 	}
+// 	return ToECDSA(b)
+// }
 
-func FromECDSAPub(pub *ecdsa.PublicKey) []byte {
-	if pub == nil || pub.X == nil || pub.Y == nil {
-		return nil
-	}
-	return elliptic.Marshal(S256(), pub.X, pub.Y)
-}
+// // LoadECDSA loads a secp256k1 private key from the given file.
+// func LoadECDSA(file string) (*ecdsa.PrivateKey, error) {
+// 	buf := make([]byte, 64)
+// 	fd, err := os.Open(file)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer fd.Close()
+// 	if _, err := io.ReadFull(fd, buf); err != nil {
+// 		return nil, err
+// 	}
 
-// HexToECDSA parses a secp256k1 private key.
-func HexToECDSA(hexkey string) (*ecdsa.PrivateKey, error) {
-	b, err := hex.DecodeString(hexkey)
-	if err != nil {
-		return nil, errors.New("invalid hex string")
-	}
-	return ToECDSA(b)
-}
+// 	key, err := hex.DecodeString(string(buf))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return ToECDSA(key)
+// }
 
-// LoadECDSA loads a secp256k1 private key from the given file.
-func LoadECDSA(file string) (*ecdsa.PrivateKey, error) {
-	buf := make([]byte, 64)
-	fd, err := os.Open(file)
-	if err != nil {
-		return nil, err
-	}
-	defer fd.Close()
-	if _, err := io.ReadFull(fd, buf); err != nil {
-		return nil, err
-	}
+// // SaveECDSA saves a secp256k1 private key to the given file with
+// // restrictive permissions. The key data is saved hex-encoded.
+// func SaveECDSA(file string, key *ecdsa.PrivateKey) error {
+// 	k := hex.EncodeToString(FromECDSA(key))
+// 	return ioutil.WriteFile(file, []byte(k), 0600)
+// }
 
-	key, err := hex.DecodeString(string(buf))
-	if err != nil {
-		return nil, err
-	}
-	return ToECDSA(key)
-}
+// func GenerateKey() (*ecdsa.PrivateKey, error) {
+// 	return ecdsa.GenerateKey(S256(), rand.Reader)
+// }
 
-// SaveECDSA saves a secp256k1 private key to the given file with
-// restrictive permissions. The key data is saved hex-encoded.
-func SaveECDSA(file string, key *ecdsa.PrivateKey) error {
-	k := hex.EncodeToString(FromECDSA(key))
-	return ioutil.WriteFile(file, []byte(k), 0600)
-}
+// // ValidateSignatureValues verifies whether the signature values are valid with
+// // the given chain rules. The v value is assumed to be either 0 or 1.
+// func ValidateSignatureValues(v byte, r, s *big.Int, homestead bool) bool {
+// 	return true
+// 	// 值的简单验证, 不适用sm2
+// 	if r.Cmp(common.Big1) < 0 || s.Cmp(common.Big1) < 0 {
+// 		return false
+// 	}
+// 	// reject upper range of s values (ECDSA malleability)
+// 	// see discussion in secp256k1/libsecp256k1/include/secp256k1.h
+// 	if homestead && s.Cmp(sm2NhalfN) > 0 {
+// 		return false
+// 	}
+// 	// Frontier: allow s to be in full N range
+// 	return r.Cmp(sm2N) < 0 && s.Cmp(sm2N) < 0 && (v == 0 || v == 1)
+// }
 
-func GenerateKey() (*ecdsa.PrivateKey, error) {
-	return ecdsa.GenerateKey(S256(), rand.Reader)
-}
+// func PubkeyToAddress(p ecdsa.PublicKey) common.Address {
+// 	pubBytes := FromECDSAPub(&p)
+// 	return common.BytesToAddress(Keccak256(pubBytes[1:])[12:])
+// }
 
-// ValidateSignatureValues verifies whether the signature values are valid with
-// the given chain rules. The v value is assumed to be either 0 or 1.
-func ValidateSignatureValues(v byte, r, s *big.Int, homestead bool) bool {
-	return true
-	// 值的简单验证, 不适用sm2
-	if r.Cmp(common.Big1) < 0 || s.Cmp(common.Big1) < 0 {
-		return false
-	}
-	// reject upper range of s values (ECDSA malleability)
-	// see discussion in secp256k1/libsecp256k1/include/secp256k1.h
-	if homestead && s.Cmp(sm2NhalfN) > 0 {
-		return false
-	}
-	// Frontier: allow s to be in full N range
-	return r.Cmp(sm2N) < 0 && s.Cmp(sm2N) < 0 && (v == 0 || v == 1)
-}
-
-func PubkeyToAddress(p ecdsa.PublicKey) common.Address {
-	pubBytes := FromECDSAPub(&p)
-	return common.BytesToAddress(Keccak256(pubBytes[1:])[12:])
-}
-
-func zeroBytes(bytes []byte) {
-	for i := range bytes {
-		bytes[i] = 0
-	}
-}
+// func zeroBytes(bytes []byte) {
+// 	for i := range bytes {
+// 		bytes[i] = 0
+// 	}
+// }
