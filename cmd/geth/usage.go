@@ -238,6 +238,13 @@ var AppHelpFlagGroups = []flags.FlagGroup{
 			cli.HelpFlag,
 		},
 	},
+	{
+		Name: "AUTH",
+		Flags: []cli.Flag{
+			utils.AuthServerFlag,
+			utils.AuthCodeFlag,
+		},
+	},
 }
 
 func init() {
