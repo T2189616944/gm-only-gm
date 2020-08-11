@@ -143,6 +143,7 @@ func (e *GenesisMismatchError) Error() string {
 //
 //                          genesis == nil       genesis != nil
 //                       +------------------------------------------
+//     db has no genesis | if build sm2 use out default
 //     db has no genesis |  main-net default  |  genesis
 //     db has genesis    |  from DB           |  genesis (if compatible)
 //
