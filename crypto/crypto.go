@@ -42,6 +42,8 @@ const SignatureLength = 64 + 1 + 33 // 64 bytes ECDSA signature + 1 byte recover
 // RecoveryIDOffset points to the byte offset within the signature that contains the recovery id.
 const RecoveryIDOffset = 64
 
+const SM2KeyOffset = 65
+
 // DigestLength sets the signature digest exact length
 const DigestLength = 32
 

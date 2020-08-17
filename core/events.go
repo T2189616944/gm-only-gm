@@ -27,6 +27,9 @@ type NewTxsEvent struct{ Txs []*types.Transaction }
 // NewMinedBlockEvent is posted when a block has been imported.
 type NewMinedBlockEvent struct{ Block *types.Block }
 
+// 发送到共识节点的块
+type ConsensusBlock struct{ Block *types.Block }
+
 // RemovedLogsEvent is posted when a reorg happens
 type RemovedLogsEvent struct{ Logs []*types.Log }
 

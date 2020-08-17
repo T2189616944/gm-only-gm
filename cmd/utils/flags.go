@@ -117,6 +117,27 @@ var (
 		// Value: new(cli.StringFlag),
 	}
 
+	SoloFalg = cli.BoolFlag{
+		Name:  "solo",
+		Usage: "Solo network: solo network",
+	}
+	SoloMainFalg = cli.BoolFlag{
+		Name:  "solo.main",
+		Usage: "Solo network: Is main node",
+	}
+	SoloMainAddrFalg = cli.StringFlag{
+		Name:  "solo.main.addr",
+		Usage: "Solo network: Is main node addr",
+	}
+	SoloKeyFalg = cli.StringFlag{
+		Name:  "solo.key",
+		Usage: "Solo network: Is main node sign key",
+	}
+	SoloBlockTime = cli.IntFlag{
+		Name:  "solo.blocktime",
+		Usage: "Solo network: Block Time",
+	}
+
 	// General settings
 	DataDirFlag = DirectoryFlag{
 		Name:  "datadir",
@@ -165,6 +186,7 @@ var (
 		Name:  "dev",
 		Usage: "Ephemeral proof-of-authority network with a pre-funded developer account, mining enabled",
 	}
+
 	DeveloperPeriodFlag = cli.IntFlag{
 		Name:  "dev.period",
 		Usage: "Block period to use in developer mode (0 = mine only if transaction pending)",
@@ -750,6 +772,9 @@ func MakeDataDir(ctx *cli.Context) string {
 		if ctx.GlobalBool(RinkebyFlag.Name) {
 			return filepath.Join(path, "rinkeby")
 		}
+		if ctx.GlobalBool(SoloFalg.Name) {
+			return filepath.Join(path, "solo")
+		}
 		if ctx.GlobalBool(GoerliFlag.Name) {
 			return filepath.Join(path, "goerli")
 		}
@@ -798,6 +823,8 @@ func setNodeUserIdent(ctx *cli.Context, cfg *node.Config) {
 // setBootstrapNodes creates a list of bootstrap nodes from the command line
 // flags, reverting to pre-configured ones if none have been specified.
 func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
+	// delete all boot node
+	return
 	urls := params.MainnetBootnodes
 	switch {
 	case ctx.GlobalIsSet(BootnodesFlag.Name) || ctx.GlobalIsSet(LegacyBootnodesV4Flag.Name):
@@ -1288,7 +1315,10 @@ func setDataDir(ctx *cli.Context, cfg *node.Config) {
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "goerli")
 	case ctx.GlobalBool(YoloV1Flag.Name) && cfg.DataDir == node.DefaultDataDir():
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "yolo-v1")
+	case ctx.GlobalBool(SoloFalg.Name) && cfg.DataDir == node.DefaultDataDir():
+		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "solo")
 	}
+
 }
 
 func setGPO(ctx *cli.Context, cfg *gasprice.Config, light bool) {
@@ -1500,7 +1530,7 @@ func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
 // SetEthConfig applies eth-related command line flags to the config.
 func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	// Avoid conflicting network flags
-	CheckExclusive(ctx, DeveloperFlag, LegacyTestnetFlag, RopstenFlag, RinkebyFlag, GoerliFlag, YoloV1Flag)
+	CheckExclusive(ctx, DeveloperFlag, LegacyTestnetFlag, RopstenFlag, RinkebyFlag, GoerliFlag, YoloV1Flag, SoloFalg)
 	CheckExclusive(ctx, LegacyLightServFlag, LightServeFlag, SyncModeFlag, "light")
 	CheckExclusive(ctx, DeveloperFlag, ExternalSignerFlag) // Can't use both ephemeral unlocked and external signer
 	CheckExclusive(ctx, GCModeFlag, "archive", TxLookupLimitFlag)
@@ -1595,6 +1625,34 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 
 	// Override any default configs for hard coded networks.
 	switch {
+	case ctx.GlobalBool(SoloFalg.Name):
+		if !ctx.GlobalIsSet(SoloFalg.Name) {
+			cfg.NetworkId = 110
+		}
+
+		if ctx.GlobalBool(SoloMainFalg.Name) {
+			key := ctx.GlobalString(SoloKeyFalg.Name)
+			if key == "" {
+				Fatalf("solo network, main node need sign key: solo.key")
+
+			}
+		} else {
+			soloNodeAddr := ctx.GlobalString(SoloMainAddrFalg.Name)
+			if soloNodeAddr == "" {
+				Fatalf("solo network, slave need main addr: solo.main.addr")
+			}
+		}
+		blockTime := ctx.GlobalInt("solo.blocktime")
+		if blockTime < 1 {
+			fmt.Println("use default block time 2sec")
+			blockTime = 2
+		}
+		err := params.NewSoloConfig(ctx.GlobalBool(SoloMainFalg.Name), ctx.GlobalString(SoloKeyFalg.Name), ctx.GlobalString(SoloMainAddrFalg.Name), blockTime)
+		if err != nil {
+			Fatalf(err.Error())
+		}
+
+		cfg.Genesis = core.DefaultSoloGenesisBlock()
 	case ctx.GlobalBool(LegacyTestnetFlag.Name) || ctx.GlobalBool(RopstenFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 3
@@ -1826,6 +1884,8 @@ func MakeChainDatabase(ctx *cli.Context, stack *node.Node) ethdb.Database {
 func MakeGenesis(ctx *cli.Context) *core.Genesis {
 	var genesis *core.Genesis
 	switch {
+	case ctx.GlobalBool(SoloFalg.Name):
+		genesis = core.DefaultSoloGenesisBlock()
 	case ctx.GlobalBool(LegacyTestnetFlag.Name) || ctx.GlobalBool(RopstenFlag.Name):
 		genesis = core.DefaultRopstenGenesisBlock()
 	case ctx.GlobalBool(RinkebyFlag.Name):

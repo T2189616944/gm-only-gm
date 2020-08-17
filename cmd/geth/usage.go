@@ -52,6 +52,11 @@ var AppHelpFlagGroups = []flags.FlagGroup{
 			utils.IdentityFlag,
 			utils.LightKDFFlag,
 			utils.WhitelistFlag,
+			utils.SoloFalg,
+			utils.SoloMainFalg,
+			utils.SoloMainAddrFalg,
+			utils.SoloKeyFalg,
+			utils.SoloBlockTime,
 		},
 	},
 	{

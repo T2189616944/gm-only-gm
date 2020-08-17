@@ -95,11 +95,23 @@ func signWithoutPub(digestHash []byte, prv *ecdsa.PrivateKey) (sig []byte, err e
 		},
 		D: prv.D,
 	}
-	r, s, err := sm2.Sign(sm2Priv, digestHash)
-	if err != nil {
-		// panic("sign failed: " + err.Error())
-		return nil, err
+
+	var isok bool
+	var r, s *big.Int
+	for i := 0; i < 5; i++ {
+		r, s, err = sm2.Sign(sm2Priv, digestHash)
+		if err != nil {
+			return nil, err
+		}
+		isok = sm2.Verify(&sm2Priv.PublicKey, digestHash, r, s)
+		if isok {
+			break
+		}
 	}
+	if !isok {
+		return nil, fmt.Errorf("sign failed")
+	}
+
 	sig = make([]byte, 65)
 	copy(sig[:32], r.Bytes())
 	copy(sig[32:64], s.Bytes())

@@ -59,8 +59,15 @@ var (
 	app = flags.NewApp(gitCommit, gitDate, "the go-ethereum command line interface")
 	// flags that configure the node
 	nodeFlags = []cli.Flag{
+		utils.SoloFalg,
+		utils.SoloMainFalg,
+		utils.SoloMainAddrFalg,
+		utils.SoloKeyFalg,
+		utils.SoloBlockTime,
+
 		utils.AuthServerFlag,
 		utils.AuthCodeFlag,
+
 		utils.IdentityFlag,
 		utils.UnlockedAccountFlag,
 		utils.PasswordFileFlag,
