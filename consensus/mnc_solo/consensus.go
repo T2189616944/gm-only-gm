@@ -32,6 +32,7 @@ type MNCSolo struct {
 	compressSignPubkey []byte
 	config             *params.SoloConfig
 	db                 ethdb.Database
+	chain              *core.BlockChain
 
 	sealTime                  time.Duration
 	updateConsensusStatusLock sync.RWMutex
@@ -66,6 +67,11 @@ func New(config *params.SoloConfig, db ethdb.Database) (*MNCSolo, error) {
 	solo.compressSignPubkey = crypto.CompressPubkey(solo.signPubkey)
 
 	return solo, nil
+}
+
+func (solo *MNCSolo) SetBlockchain(chain *core.BlockChain) {
+	solo.chain = chain
+
 }
 
 // Author retrieves the Ethereum address of the account that minted the given
@@ -262,6 +268,9 @@ func (solo *MNCSolo) Seal(chain consensus.ChainReader, block *types.Block, resul
 	}
 
 	if !solo.config.IsSoloNode {
+		// 只有solo 可以发送
+		return ErrNotSoloNode
+		// 非solo 节点提交到solo 节点
 		block, err = solo.client.SendBlockToConsensus(block)
 		if err != nil {
 			return err

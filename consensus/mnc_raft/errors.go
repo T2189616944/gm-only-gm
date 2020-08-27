@@ -1,4 +1,4 @@
-package mnc_solo
+package mnc_raft
 
 import (
 	"errors"
@@ -6,5 +6,4 @@ import (
 
 var (
 	ErrVerifyHeaderFailed = errors.New("verify failed")
-	ErrNotSoloNode        = errors.New("not solo note.")
 )

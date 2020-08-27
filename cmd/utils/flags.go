@@ -39,6 +39,7 @@ import (
 	"github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/consensus/clique"
 	"github.com/ethereum/go-ethereum/consensus/ethash"
+	"github.com/ethereum/go-ethereum/consensus/mnc_solo"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/vm"
@@ -117,25 +118,30 @@ var (
 		// Value: new(cli.StringFlag),
 	}
 
-	SoloFalg = cli.BoolFlag{
+	SoloFlag = cli.BoolFlag{
 		Name:  "solo",
 		Usage: "Solo network: solo network",
 	}
-	SoloMainFalg = cli.BoolFlag{
+	SoloMainFlag = cli.BoolFlag{
 		Name:  "solo.main",
 		Usage: "Solo network: Is main node",
 	}
-	SoloMainAddrFalg = cli.StringFlag{
+	SoloMainAddrFlag = cli.StringFlag{
 		Name:  "solo.main.addr",
 		Usage: "Solo network: Is main node addr",
 	}
-	SoloKeyFalg = cli.StringFlag{
+	SoloKeyFlag = cli.StringFlag{
 		Name:  "solo.key",
 		Usage: "Solo network: Is main node sign key",
 	}
 	SoloBlockTime = cli.IntFlag{
 		Name:  "solo.blocktime",
 		Usage: "Solo network: Block Time",
+	}
+
+	RaftFlag = cli.BoolFlag{
+		Name:  "raft",
+		Usage: "raft network: solo network",
 	}
 
 	// General settings
@@ -772,8 +778,11 @@ func MakeDataDir(ctx *cli.Context) string {
 		if ctx.GlobalBool(RinkebyFlag.Name) {
 			return filepath.Join(path, "rinkeby")
 		}
-		if ctx.GlobalBool(SoloFalg.Name) {
+		if ctx.GlobalBool(SoloFlag.Name) {
 			return filepath.Join(path, "solo")
+		}
+		if ctx.GlobalBool(RaftFlag.Name) {
+			return filepath.Join(path, "raft")
 		}
 		if ctx.GlobalBool(GoerliFlag.Name) {
 			return filepath.Join(path, "goerli")
@@ -1315,8 +1324,10 @@ func setDataDir(ctx *cli.Context, cfg *node.Config) {
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "goerli")
 	case ctx.GlobalBool(YoloV1Flag.Name) && cfg.DataDir == node.DefaultDataDir():
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "yolo-v1")
-	case ctx.GlobalBool(SoloFalg.Name) && cfg.DataDir == node.DefaultDataDir():
+	case ctx.GlobalBool(SoloFlag.Name) && cfg.DataDir == node.DefaultDataDir():
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "solo")
+	case ctx.GlobalBool(RaftFlag.Name) && cfg.DataDir == node.DefaultDataDir():
+		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "raft")
 	}
 
 }
@@ -1530,7 +1541,7 @@ func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
 // SetEthConfig applies eth-related command line flags to the config.
 func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	// Avoid conflicting network flags
-	CheckExclusive(ctx, DeveloperFlag, LegacyTestnetFlag, RopstenFlag, RinkebyFlag, GoerliFlag, YoloV1Flag, SoloFalg)
+	CheckExclusive(ctx, DeveloperFlag, LegacyTestnetFlag, RopstenFlag, RinkebyFlag, GoerliFlag, YoloV1Flag, SoloFlag, RaftFlag)
 	CheckExclusive(ctx, LegacyLightServFlag, LightServeFlag, SyncModeFlag, "light")
 	CheckExclusive(ctx, DeveloperFlag, ExternalSignerFlag) // Can't use both ephemeral unlocked and external signer
 	CheckExclusive(ctx, GCModeFlag, "archive", TxLookupLimitFlag)
@@ -1625,19 +1636,26 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 
 	// Override any default configs for hard coded networks.
 	switch {
-	case ctx.GlobalBool(SoloFalg.Name):
-		if !ctx.GlobalIsSet(SoloFalg.Name) {
+	case ctx.GlobalBool(RaftFlag.Name):
+		fmt.Println("raftzxxxxx")
+		err := params.NewRaftConfig()
+		if err != nil {
+			Fatalf(err.Error())
+		}
+		cfg.Genesis = core.DefaultRaftGenesisBlock()
+	case ctx.GlobalBool(SoloFlag.Name):
+		if !ctx.GlobalIsSet(SoloFlag.Name) {
 			cfg.NetworkId = 110
 		}
 
-		if ctx.GlobalBool(SoloMainFalg.Name) {
-			key := ctx.GlobalString(SoloKeyFalg.Name)
+		if ctx.GlobalBool(SoloMainFlag.Name) {
+			key := ctx.GlobalString(SoloKeyFlag.Name)
 			if key == "" {
 				Fatalf("solo network, main node need sign key: solo.key")
 
 			}
 		} else {
-			soloNodeAddr := ctx.GlobalString(SoloMainAddrFalg.Name)
+			soloNodeAddr := ctx.GlobalString(SoloMainAddrFlag.Name)
 			if soloNodeAddr == "" {
 				Fatalf("solo network, slave need main addr: solo.main.addr")
 			}
@@ -1647,7 +1665,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			fmt.Println("use default block time 2sec")
 			blockTime = 2
 		}
-		err := params.NewSoloConfig(ctx.GlobalBool(SoloMainFalg.Name), ctx.GlobalString(SoloKeyFalg.Name), ctx.GlobalString(SoloMainAddrFalg.Name), blockTime)
+		err := params.NewSoloConfig(ctx.GlobalBool(SoloMainFlag.Name), ctx.GlobalString(SoloKeyFlag.Name), ctx.GlobalString(SoloMainAddrFlag.Name), blockTime)
 		if err != nil {
 			Fatalf(err.Error())
 		}
@@ -1884,7 +1902,7 @@ func MakeChainDatabase(ctx *cli.Context, stack *node.Node) ethdb.Database {
 func MakeGenesis(ctx *cli.Context) *core.Genesis {
 	var genesis *core.Genesis
 	switch {
-	case ctx.GlobalBool(SoloFalg.Name):
+	case ctx.GlobalBool(SoloFlag.Name):
 		genesis = core.DefaultSoloGenesisBlock()
 	case ctx.GlobalBool(LegacyTestnetFlag.Name) || ctx.GlobalBool(RopstenFlag.Name):
 		genesis = core.DefaultRopstenGenesisBlock()
@@ -1909,7 +1927,9 @@ func MakeChain(ctx *cli.Context, stack *node.Node, readOnly bool) (chain *core.B
 		Fatalf("%v", err)
 	}
 	var engine consensus.Engine
-	if config.Clique != nil {
+	if config.Solo != nil {
+		engine, _ = mnc_solo.New(config.Solo, chainDb)
+	} else if config.Clique != nil {
 		engine = clique.New(config.Clique, chainDb)
 	} else {
 		engine = ethash.NewFaker()

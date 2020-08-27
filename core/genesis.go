@@ -379,6 +379,17 @@ func DefaultSoloGenesisBlock() *Genesis {
 	}
 }
 
+func DefaultRaftGenesisBlock() *Genesis {
+	return &Genesis{
+		Config:     params.RaftChainConfig,
+		Timestamp:  1024,
+		ExtraData:  make([]byte, 98), // 签名solo
+		GasLimit:   4700000,
+		Difficulty: big.NewInt(1),
+		Alloc:      make(GenesisAlloc),
+	}
+}
+
 // DefaultGoerliGenesisBlock returns the Görli network genesis block.
 func DefaultGoerliGenesisBlock() *Genesis {
 	return &Genesis{

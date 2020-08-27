@@ -1,11 +1,10 @@
-package mnc_solo
+package mnc_raft
 
 import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core"
-	// "github.com/ethereum/go-ethereum/core/types"
+
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -61,36 +60,5 @@ func (api *API) BlockToConsensus(hexRlpBlock string) (out string, err error) {
 	}
 	block = block.WithSeal(header)
 
-	// 需要把块写入到本地链
-	// var (
-	// 	receipts = make([]*types.Receipt, len(task.receipts))
-	// 	logs     []*types.Log
-	// )
-
-	// for i, receipt := range task.receipts {
-	// 	// add block location fields
-	// 	receipt.BlockHash = hash
-	// 	receipt.BlockNumber = block.Number()
-	// 	receipt.TransactionIndex = uint(i)
-
-	// 	receipts[i] = new(types.Receipt)
-	// 	*receipts[i] = *receipt
-	// 	// Update the block hash in all logs since it is now available and not when the
-	// 	// receipt/log of individual transactions were created.
-	// 	for _, log := range receipt.Logs {
-	// 		log.BlockHash = hash
-	// 	}
-	// 	logs = append(logs, receipt.Logs...)
-	// }
-	// // Commit block and state to database.
-	// _, err = api.solo.chain.WriteBlockWithState(block, receipts, logs, task.state, true)
-	// if err != nil {
-	// 	fmt.Println("Failed writing block to chain", "err", err)
-	// 	return "", err
-	// }
-
-	err = api.solo.config.Mux.Post(core.NewMinedBlockEvent{Block: block})
-	fmt.Println("br block ")
-	fmt.Println(err)
 	return encodeBlock(block)
 }

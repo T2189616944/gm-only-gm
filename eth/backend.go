@@ -32,6 +32,7 @@ import (
 	"github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/consensus/clique"
 	"github.com/ethereum/go-ethereum/consensus/ethash"
+	"github.com/ethereum/go-ethereum/consensus/mnc_raft"
 	"github.com/ethereum/go-ethereum/consensus/mnc_solo"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/bloombits"
@@ -260,6 +261,14 @@ func CreateConsensusEngine(ctx *node.ServiceContext, chainConfig *params.ChainCo
 	if chainConfig.Solo != nil {
 		chainConfig.Solo.Mux = ctx.EventMux
 		eng, err := mnc_solo.New(chainConfig.Solo, db)
+		if err != nil {
+			log.Error("new solo consensue failed:" + err.Error())
+		}
+		return eng
+	}
+
+	if chainConfig.Raft != nil {
+		eng, err := mnc_raft.New(chainConfig.Raft, db)
 		if err != nil {
 			log.Error("new solo consensue failed:" + err.Error())
 		}

@@ -28,6 +28,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/consensus/misc"
+	"github.com/ethereum/go-ethereum/consensus/mnc_solo"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -221,6 +222,11 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 	if recommit < minRecommitInterval {
 		log.Warn("Sanitizing miner recommit interval", "provided", recommit, "updated", minRecommitInterval)
 		recommit = minRecommitInterval
+	}
+
+	v, ok := (interface{}(engine)).((*mnc_solo.MNCSolo))
+	if ok {
+		v.SetBlockchain(worker.chain)
 	}
 
 	go worker.mainLoop()
